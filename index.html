@@ -1,0 +1,729 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Tilt & Roll 🌟</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;700;900&display=swap');
+
+  * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+  :root {
+    --sky: #fef3c7;
+    --pink: #f472b6;
+    --purple: #a78bfa;
+    --mint: #34d399;
+    --coral: #fb7185;
+    --yellow: #fbbf24;
+    --blue: #60a5fa;
+    --wall: #7c3aed;
+    --wall2: #db2777;
+  }
+
+  html, body {
+    width: 100%; height: 100%;
+    overflow: hidden;
+    background: #fdf4ff;
+    font-family: 'Fredoka One', cursive;
+    user-select: none;
+  }
+
+  #screen {
+    position: fixed; inset: 0;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+  }
+
+  /* ── SPLASH ── */
+  #splash {
+    position: absolute; inset: 0;
+    background: linear-gradient(160deg, #fde68a 0%, #fbcfe8 40%, #ddd6fe 100%);
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    z-index: 100;
+    transition: opacity .5s;
+  }
+  #splash .logo { font-size: 3.2rem; color: #7c3aed; text-shadow: 4px 4px 0 #f472b6; margin-bottom: 8px; }
+  #splash .sub  { font-family: 'Nunito', sans-serif; font-weight: 700; font-size: 1.1rem; color: #6d28d9; margin-bottom: 40px; }
+  #splash .emoji-row { font-size: 2.8rem; margin-bottom: 40px; animation: bounce2 1s infinite; }
+  @keyframes bounce2 { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-14px)} }
+
+  .btn {
+    font-family: 'Fredoka One', cursive;
+    font-size: 1.4rem; letter-spacing: .5px;
+    padding: 16px 48px;
+    border: none; border-radius: 60px;
+    background: linear-gradient(135deg, #f472b6, #a78bfa);
+    color: #fff; cursor: pointer;
+    box-shadow: 0 6px 0 #7c3aed, 0 10px 24px rgba(167,139,250,.5);
+    transform: translateY(0);
+    transition: transform .1s, box-shadow .1s;
+    -webkit-appearance: none;
+  }
+  .btn:active { transform: translateY(4px); box-shadow: 0 2px 0 #7c3aed, 0 4px 12px rgba(167,139,250,.3); }
+
+  /* ── HUD ── */
+  #hud {
+    position: fixed; top: 0; left: 0; right: 0;
+    padding: 14px 20px 0;
+    display: flex; justify-content: space-between; align-items: center;
+    z-index: 10; pointer-events: none;
+  }
+  #hud .stars { font-size: 1.3rem; color: #7c3aed; font-family: 'Fredoka One', cursive; }
+  #hud .level { font-size: 1.1rem; color: #db2777; font-family: 'Fredoka One', cursive; }
+  #hud .timer { font-size: 1.1rem; color: #059669; font-family: 'Fredoka One', cursive; }
+
+  /* ── CANVAS ── */
+  #gameCanvas {
+    position: absolute; inset: 0;
+    width: 100%; height: 100%;
+    display: block;
+  }
+
+  /* ── OVERLAY (win/lose) ── */
+  #overlay {
+    position: fixed; inset: 0;
+    background: rgba(253,244,255,.88);
+    display: none; flex-direction: column;
+    align-items: center; justify-content: center;
+    z-index: 50; backdrop-filter: blur(6px);
+  }
+  #overlay.show { display: flex; }
+  #overlay .big { font-size: 4rem; margin-bottom: 8px; }
+  #overlay .msg { font-size: 2rem; color: #7c3aed; text-shadow: 3px 3px 0 #f472b6; margin-bottom: 6px; }
+  #overlay .sub-msg { font-family: 'Nunito', sans-serif; font-size: 1rem; color: #6d28d9; margin-bottom: 36px; }
+
+  /* ── PERMISSION BANNER ── */
+  #permBanner {
+    position: fixed; inset: 0;
+    background: linear-gradient(160deg,#fde68a,#fbcfe8 50%,#ddd6fe);
+    display: none; flex-direction: column;
+    align-items: center; justify-content: center;
+    z-index: 200; text-align: center; padding: 32px;
+  }
+  #permBanner.show { display: flex; }
+  #permBanner .ttl { font-size: 2.2rem; color: #7c3aed; text-shadow: 3px 3px 0 #f472b6; margin-bottom: 12px; }
+  #permBanner p  { font-family:'Nunito',sans-serif; font-size:1rem; color:#6d28d9; margin-bottom: 36px; max-width:280px; }
+</style>
+</head>
+<body>
+
+<div id="splash">
+  <div class="logo">Tilt & Roll</div>
+  <div class="sub">tilt your phone to guide the star!</div>
+  <div class="emoji-row">🌟✨⭐</div>
+  <button class="btn" id="startBtn">Let's Play!</button>
+</div>
+
+<div id="permBanner">
+  <div class="ttl">One tap needed!</div>
+  <p>Tap below to allow motion access so you can tilt &amp; play 🎮</p>
+  <button class="btn" id="permBtn">Allow Motion 📱</button>
+</div>
+
+<div id="hud">
+  <div class="stars" id="starDisplay">⭐ 0</div>
+  <div class="level"  id="lvlDisplay">Level 1</div>
+  <div class="timer"  id="timerDisplay">⏱ 30</div>
+</div>
+
+<canvas id="gameCanvas"></canvas>
+
+<div id="overlay">
+  <div class="big" id="overlayEmoji">🎉</div>
+  <div class="msg"  id="overlayMsg">Level Clear!</div>
+  <div class="sub-msg" id="overlaySub">Amazing!</div>
+  <button class="btn" id="nextBtn">Next Level →</button>
+</div>
+
+<script>
+// ─────────────────────────────────────────────
+//  UTILITIES
+// ─────────────────────────────────────────────
+const canvas  = document.getElementById('gameCanvas');
+const ctx     = canvas.getContext('2d');
+const overlay = document.getElementById('overlay');
+const splash  = document.getElementById('splash');
+const permBanner = document.getElementById('permBanner');
+
+let W, H, CELL, COLS, ROWS;
+let tiltX = 0, tiltY = 0;   // −1 … 1
+let gyroAvailable = false;
+let gameRunning = false;
+let stars = 0, level = 1, timeLeft = 30;
+let timerInterval = null;
+let animId = null;
+
+// ─────────────────────────────────────────────
+//  RESIZE
+// ─────────────────────────────────────────────
+function resize() {
+  W = canvas.width  = window.innerWidth;
+  H = canvas.height = window.innerHeight;
+}
+window.addEventListener('resize', () => { resize(); initLevel(); });
+
+// ─────────────────────────────────────────────
+//  MAZE DATA  (0=open, 1=wall, 2=gem, 3=exit)
+// ─────────────────────────────────────────────
+const MAZES = [
+  // Level 1  12×18
+  [
+    [1,1,1,1,1,1,1,1,1,1,1,1],
+    [1,0,0,0,1,0,0,0,0,0,2,1],
+    [1,0,1,0,1,0,1,1,1,0,1,1],
+    [1,0,1,0,0,0,1,0,0,0,1,1],
+    [1,0,1,1,1,1,1,0,1,1,1,1],
+    [1,0,0,0,0,0,0,0,0,2,1,1],
+    [1,1,1,0,1,1,1,1,1,0,1,1],
+    [1,2,0,0,1,0,0,0,1,0,1,1],
+    [1,1,1,1,1,0,1,0,0,0,1,1],
+    [1,0,0,0,0,0,1,1,1,0,1,1],
+    [1,0,1,1,1,1,1,0,0,0,1,1],
+    [1,0,0,0,0,0,0,0,1,1,1,1],
+    [1,1,1,1,0,1,1,0,1,0,2,1],
+    [1,0,0,0,0,0,1,0,0,0,1,1],
+    [1,0,1,1,1,0,1,1,1,0,1,1],
+    [1,0,0,2,1,0,0,0,0,0,1,1],
+    [1,1,1,1,1,1,1,1,1,0,3,1],
+    [1,1,1,1,1,1,1,1,1,1,1,1],
+  ],
+  // Level 2  12×18
+  [
+    [1,1,1,1,1,1,1,1,1,1,1,1],
+    [1,0,0,2,0,0,1,0,0,0,0,1],
+    [1,1,1,1,0,1,1,0,1,1,0,1],
+    [1,0,0,0,0,0,0,0,0,1,0,1],
+    [1,0,1,1,1,1,1,1,0,1,2,1],
+    [1,0,0,0,0,2,1,1,0,0,1,1],
+    [1,1,1,1,0,1,0,0,0,1,1,1],
+    [1,0,0,1,0,1,0,1,0,0,0,1],
+    [1,0,1,1,0,0,0,1,1,1,0,1],
+    [1,0,0,0,1,1,0,0,0,0,0,1],
+    [1,1,1,0,1,0,0,1,1,1,0,1],
+    [1,2,0,0,0,0,1,0,0,0,0,1],
+    [1,1,1,1,1,0,1,0,1,1,1,1],
+    [1,0,0,0,0,0,0,0,0,0,2,1],
+    [1,0,1,1,1,1,1,1,1,0,1,1],
+    [1,0,0,0,2,0,0,0,1,0,0,1],
+    [1,1,1,1,1,1,1,1,1,1,3,1],
+    [1,1,1,1,1,1,1,1,1,1,1,1],
+  ],
+  // Level 3 – same dims, denser
+  [
+    [1,1,1,1,1,1,1,1,1,1,1,1],
+    [1,0,1,0,0,0,0,1,0,2,0,1],
+    [1,0,1,0,1,1,0,1,0,1,0,1],
+    [1,0,0,0,1,0,0,0,0,1,2,1],
+    [1,1,1,1,1,0,1,1,1,1,1,1],
+    [1,2,0,0,0,0,1,0,0,0,0,1],
+    [1,1,1,1,0,1,1,0,1,1,0,1],
+    [1,0,0,1,0,0,0,0,1,0,0,1],
+    [1,0,1,1,1,1,1,0,1,0,1,1],
+    [1,0,0,0,2,0,1,0,0,0,1,1],
+    [1,1,1,0,1,0,1,1,1,0,1,1],
+    [1,0,0,0,1,0,0,0,1,0,0,1],
+    [1,0,1,1,1,1,1,0,1,1,2,1],
+    [1,0,0,0,0,0,1,0,0,0,1,1],
+    [1,1,1,1,0,1,1,1,1,0,1,1],
+    [1,0,2,0,0,0,0,0,0,0,0,1],
+    [1,1,1,1,1,1,1,1,1,1,3,1],
+    [1,1,1,1,1,1,1,1,1,1,1,1],
+  ],
+];
+
+// ─────────────────────────────────────────────
+//  GAME STATE
+// ─────────────────────────────────────────────
+let maze, gemsCells, exitCell;
+let ball = { x:0, y:0, vx:0, vy:0, r:0 };
+let particles = [];
+let gemsCollected = 0, totalGems = 0;
+let levelIdx = 0;
+let bgGrad;
+
+// pastel palette per level
+const PALETTES = [
+  { bg1:'#fef9c3', bg2:'#fce7f3', wall:'#a855f7', wall2:'#ec4899', gem:'#fbbf24', exit:'#34d399', ball:'#f472b6' },
+  { bg1:'#e0f2fe', bg2:'#fae8ff', wall:'#3b82f6', wall2:'#8b5cf6', gem:'#f97316', exit:'#06b6d4', ball:'#a78bfa' },
+  { bg1:'#dcfce7', bg2:'#fef9c3', wall:'#16a34a', wall2:'#ca8a04', gem:'#ef4444', exit:'#8b5cf6', ball:'#34d399' },
+];
+
+function getLevelData() {
+  return MAZES[levelIdx % MAZES.length];
+}
+
+function initLevel() {
+  maze = getLevelData().map(r => r.slice());
+  ROWS = maze.length;
+  COLS = maze[0].length;
+  CELL = Math.min(Math.floor(W / COLS), Math.floor(H / ROWS));
+  ball.r = CELL * 0.32;
+
+  gemsCells = [];
+  exitCell  = null;
+  gemsCollected = 0;
+
+  for (let r = 0; r < ROWS; r++) {
+    for (let c = 0; c < COLS; c++) {
+      if (maze[r][c] === 2) gemsCells.push({r,c,collected:false});
+      if (maze[r][c] === 3) exitCell = {r,c};
+    }
+  }
+  totalGems = gemsCells.length;
+
+  // start position: first open cell from top-left
+  outer: for (let r=1;r<ROWS;r++) for (let c=1;c<COLS;c++) {
+    if (maze[r][c]===0){ ball.x=c*CELL+CELL/2; ball.y=r*CELL+CELL/2; break outer; }
+  }
+  ball.vx = 0; ball.vy = 0;
+  particles = [];
+
+  const pal = PALETTES[levelIdx % PALETTES.length];
+  bgGrad = ctx.createLinearGradient(0,0,W,H);
+  bgGrad.addColorStop(0, pal.bg1);
+  bgGrad.addColorStop(1, pal.bg2);
+
+  // HUD
+  document.getElementById('lvlDisplay').textContent  = `Level ${level}`;
+  document.getElementById('starDisplay').textContent  = `⭐ ${stars}`;
+
+  // timer reset
+  clearInterval(timerInterval);
+  timeLeft = 30 + levelIdx * 5;
+  document.getElementById('timerDisplay').textContent = `⏱ ${timeLeft}`;
+  if (gameRunning) startTimer();
+}
+
+function startTimer() {
+  clearInterval(timerInterval);
+  timerInterval = setInterval(()=>{
+    if (!gameRunning) return;
+    timeLeft--;
+    document.getElementById('timerDisplay').textContent = `⏱ ${timeLeft}`;
+    if (timeLeft <= 0) { clearInterval(timerInterval); gameOver(); }
+  }, 1000);
+}
+
+// ─────────────────────────────────────────────
+//  PHYSICS
+// ─────────────────────────────────────────────
+const GRAVITY   = 0.18;
+const FRICTION  = 0.92;
+const MAX_SPEED = 4.5;
+
+function offsetX() { return (W - COLS * CELL) / 2; }
+function offsetY() { return (H - ROWS * CELL) / 2; }
+
+function updateBall() {
+  const ox = offsetX(), oy = offsetY();
+
+  ball.vx += tiltX * GRAVITY;
+  ball.vy += tiltY * GRAVITY;
+  ball.vx *= FRICTION;
+  ball.vy *= FRICTION;
+  ball.vx = Math.max(-MAX_SPEED, Math.min(MAX_SPEED, ball.vx));
+  ball.vy = Math.max(-MAX_SPEED, Math.min(MAX_SPEED, ball.vy));
+
+  let nx = ball.x + ball.vx;
+  let ny = ball.y + ball.vy;
+
+  // wall collision
+  const r2 = ball.r * 0.78;
+  const offsets = [
+    [nx, ball.y], [ball.x, ny]
+  ];
+
+  for (let axis = 0; axis < 2; axis++) {
+    let tx = axis === 0 ? nx : ball.x;
+    let ty = axis === 0 ? ball.y : ny;
+    const corners = [
+      [tx - r2, ty - r2], [tx + r2, ty - r2],
+      [tx - r2, ty + r2], [tx + r2, ty + r2],
+    ];
+    let blocked = false;
+    for (const [cx,cy] of corners) {
+      const gc = Math.floor((cx - ox) / CELL);
+      const gr = Math.floor((cy - oy) / CELL);
+      if (gr<0||gr>=ROWS||gc<0||gc>=COLS) { blocked=true; break; }
+      if (maze[gr][gc] === 1) { blocked=true; break; }
+    }
+    if (!blocked) {
+      if (axis === 0) nx = tx; else ny = ty;
+    } else {
+      if (axis === 0) { ball.vx *= -0.3; nx = ball.x; }
+      else            { ball.vy *= -0.3; ny = ball.y; }
+    }
+  }
+
+  ball.x = nx; ball.y = ny;
+
+  // gem collection
+  for (const g of gemsCells) {
+    if (g.collected) continue;
+    const gx = ox + g.c * CELL + CELL / 2;
+    const gy = oy + g.r * CELL + CELL / 2;
+    if (Math.hypot(ball.x - gx, ball.y - gy) < CELL * 0.48) {
+      g.collected = true;
+      gemsCollected++;
+      stars++;
+      document.getElementById('starDisplay').textContent = `⭐ ${stars}`;
+      spawnParticles(gx, gy, PALETTES[levelIdx%PALETTES.length].gem);
+    }
+  }
+
+  // exit
+  if (exitCell) {
+    const ex = ox + exitCell.c * CELL + CELL / 2;
+    const ey = oy + exitCell.r * CELL + CELL / 2;
+    if (Math.hypot(ball.x - ex, ball.y - ey) < CELL * 0.52) {
+      levelWin();
+    }
+  }
+}
+
+// ─────────────────────────────────────────────
+//  PARTICLES
+// ─────────────────────────────────────────────
+function spawnParticles(x, y, color) {
+  for (let i = 0; i < 14; i++) {
+    const angle = Math.random() * Math.PI * 2;
+    const speed = 1.5 + Math.random() * 3;
+    particles.push({
+      x, y,
+      vx: Math.cos(angle)*speed, vy: Math.sin(angle)*speed - 1.5,
+      life: 1, decay: 0.035 + Math.random()*0.025,
+      r: 3 + Math.random()*5,
+      color,
+      emoji: Math.random() < .3 ? ['⭐','✨','💫'][Math.floor(Math.random()*3)] : null
+    });
+  }
+}
+
+function updateParticles() {
+  for (const p of particles) {
+    p.x += p.vx; p.y += p.vy;
+    p.vy += 0.12;
+    p.life -= p.decay;
+  }
+  particles = particles.filter(p => p.life > 0);
+}
+
+function drawParticles() {
+  for (const p of particles) {
+    ctx.save();
+    ctx.globalAlpha = p.life;
+    if (p.emoji) {
+      ctx.font = `${p.r * 2.5}px serif`;
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText(p.emoji, p.x, p.y);
+    } else {
+      ctx.fillStyle = p.color;
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, p.r * p.life, 0, Math.PI*2);
+      ctx.fill();
+    }
+    ctx.restore();
+  }
+}
+
+// ─────────────────────────────────────────────
+//  DRAW
+// ─────────────────────────────────────────────
+let frame = 0;
+
+function draw() {
+  frame++;
+  ctx.clearRect(0, 0, W, H);
+
+  // background
+  ctx.fillStyle = bgGrad;
+  ctx.fillRect(0, 0, W, H);
+
+  const ox = offsetX(), oy = offsetY();
+  const pal = PALETTES[levelIdx % PALETTES.length];
+
+  // maze
+  for (let r = 0; r < ROWS; r++) {
+    for (let c = 0; c < COLS; c++) {
+      const x = ox + c * CELL, y = oy + r * CELL;
+      const cell = maze[r][c];
+
+      if (cell === 1) {
+        // 3D-ish wall
+        const g = ctx.createLinearGradient(x, y, x+CELL, y+CELL);
+        g.addColorStop(0, pal.wall);
+        g.addColorStop(1, pal.wall2);
+        ctx.fillStyle = g;
+        ctx.beginPath();
+        roundRect(ctx, x+1, y+1, CELL-2, CELL-2, 5);
+        ctx.fill();
+        // shine
+        ctx.fillStyle = 'rgba(255,255,255,0.18)';
+        ctx.beginPath();
+        roundRect(ctx, x+2, y+2, CELL*0.5, CELL*0.25, 3);
+        ctx.fill();
+      }
+
+      if (cell === 2) {
+        // find gem object
+        const g = gemsCells.find(g=>g.r===r&&g.c===c);
+        if (g && !g.collected) {
+          const pulse = 1 + Math.sin(frame*0.12 + r+c)*0.12;
+          ctx.save();
+          ctx.translate(x+CELL/2, y+CELL/2);
+          ctx.scale(pulse, pulse);
+          ctx.font = `${CELL*0.52}px serif`;
+          ctx.textAlign = 'center';
+          ctx.textBaseline = 'middle';
+          ctx.fillText('⭐', 0, 0);
+          ctx.restore();
+        }
+      }
+
+      if (cell === 3) {
+        // exit portal
+        const pulse = 0.85 + Math.sin(frame*0.1)*0.15;
+        ctx.save();
+        ctx.translate(x+CELL/2, y+CELL/2);
+        // glow
+        const grd = ctx.createRadialGradient(0,0,0,0,0,CELL*0.7);
+        grd.addColorStop(0, pal.exit+'cc');
+        grd.addColorStop(1, 'transparent');
+        ctx.fillStyle = grd;
+        ctx.beginPath(); ctx.arc(0,0,CELL*0.7,0,Math.PI*2); ctx.fill();
+        ctx.scale(pulse, pulse);
+        ctx.font = `${CELL*0.62}px serif`;
+        ctx.textAlign='center'; ctx.textBaseline='middle';
+        ctx.fillText('🌈', 0, 0);
+        ctx.restore();
+      }
+    }
+  }
+
+  // ball shadow
+  ctx.save();
+  ctx.shadowColor = 'rgba(0,0,0,0.18)';
+  ctx.shadowBlur = 12;
+  ctx.shadowOffsetY = 4;
+  ctx.fillStyle = 'rgba(0,0,0,0.08)';
+  ctx.beginPath();
+  ctx.ellipse(ball.x, ball.y + ball.r*0.7, ball.r*0.85, ball.r*0.35, 0, 0, Math.PI*2);
+  ctx.fill();
+  ctx.restore();
+
+  // ball
+  const bg = ctx.createRadialGradient(ball.x-ball.r*0.3, ball.y-ball.r*0.35, ball.r*0.05, ball.x, ball.y, ball.r);
+  bg.addColorStop(0, '#fff');
+  bg.addColorStop(0.3, pal.ball);
+  bg.addColorStop(1, shadeColor(pal.ball, -40));
+  ctx.save();
+  ctx.beginPath(); ctx.arc(ball.x, ball.y, ball.r, 0, Math.PI*2);
+  ctx.fillStyle = bg; ctx.fill();
+  // face
+  ctx.font = `${ball.r*1.35}px serif`;
+  ctx.textAlign='center'; ctx.textBaseline='middle';
+  ctx.fillText('😊', ball.x, ball.y+ball.r*0.05);
+  ctx.restore();
+
+  drawParticles();
+
+  // gem counter inside maze area
+  if (totalGems > 0) {
+    const txt = `💎 ${gemsCollected}/${totalGems}`;
+    ctx.font = `bold ${14}px Fredoka One, cursive`;
+    ctx.fillStyle = '#7c3aed';
+    ctx.textAlign = 'right';
+    ctx.fillText(txt, ox + COLS*CELL - 6, oy + ROWS*CELL + 18);
+  }
+}
+
+function shadeColor(hex, pct) {
+  const n = parseInt(hex.replace('#',''),16);
+  const r = Math.min(255,Math.max(0,((n>>16)&0xff)+pct));
+  const g = Math.min(255,Math.max(0,((n>>8)&0xff)+pct));
+  const b = Math.min(255,Math.max(0,(n&0xff)+pct));
+  return `rgb(${r},${g},${b})`;
+}
+
+function roundRect(ctx, x, y, w, h, r) {
+  ctx.moveTo(x+r,y);
+  ctx.lineTo(x+w-r,y); ctx.arcTo(x+w,y,x+w,y+r,r);
+  ctx.lineTo(x+w,y+h-r); ctx.arcTo(x+w,y+h,x+w-r,y+h,r);
+  ctx.lineTo(x+r,y+h); ctx.arcTo(x,y+h,x,y+h-r,r);
+  ctx.lineTo(x,y+r); ctx.arcTo(x,y,x+r,y,r);
+  ctx.closePath();
+}
+
+// ─────────────────────────────────────────────
+//  GAME LOOP
+// ─────────────────────────────────────────────
+function loop() {
+  if (!gameRunning) return;
+  updateBall();
+  updateParticles();
+  draw();
+  animId = requestAnimationFrame(loop);
+}
+
+// ─────────────────────────────────────────────
+//  WIN / LOSE
+// ─────────────────────────────────────────────
+function levelWin() {
+  gameRunning = false;
+  clearInterval(timerInterval);
+  cancelAnimationFrame(animId);
+  spawnParticles(ball.x, ball.y, '#fbbf24');
+  draw();
+  overlay.classList.add('show');
+  document.getElementById('overlayEmoji').textContent = '🎉';
+  document.getElementById('overlayMsg').textContent   = 'Level Clear!';
+  document.getElementById('overlaySub').textContent   = `+${gemsCollected} gems • ${timeLeft}s left`;
+  document.getElementById('nextBtn').textContent      = levelIdx+1 < MAZES.length ? 'Next Level →' : 'Play Again 🔄';
+}
+
+function gameOver() {
+  gameRunning = false;
+  clearInterval(timerInterval);
+  cancelAnimationFrame(animId);
+  overlay.classList.add('show');
+  document.getElementById('overlayEmoji').textContent = '⏰';
+  document.getElementById('overlayMsg').textContent   = 'Time\'s Up!';
+  document.getElementById('overlaySub').textContent   = `You had ${gemsCollected} gems`;
+  document.getElementById('nextBtn').textContent      = 'Try Again 🔄';
+}
+
+document.getElementById('nextBtn').addEventListener('click', () => {
+  overlay.classList.remove('show');
+  const won = document.getElementById('overlayEmoji').textContent === '🎉';
+  if (won && levelIdx+1 < MAZES.length) {
+    levelIdx++;
+    level++;
+  } else if (!won) {
+    // retry same level, keep stars
+  } else {
+    levelIdx = 0; level = 1; stars = 0;
+  }
+  gameRunning = true;
+  initLevel();
+  startTimer();
+  loop();
+});
+
+// ─────────────────────────────────────────────
+//  GYROSCOPE
+// ─────────────────────────────────────────────
+function startGyro() {
+  window.addEventListener('deviceorientation', (e) => {
+    if (!gameRunning) return;
+    // gamma = left/right tilt, beta = forward/backward
+    const g = Math.max(-45, Math.min(45, e.gamma || 0));
+    const b = Math.max(-45, Math.min(45, (e.beta || 0) - 15)); // natural tilt offset
+    tiltX = g / 45;
+    tiltY = b / 45;
+  }, true);
+  gyroAvailable = true;
+}
+
+function requestGyro() {
+  if (typeof DeviceOrientationEvent !== 'undefined' &&
+      typeof DeviceOrientationEvent.requestPermission === 'function') {
+    DeviceOrientationEvent.requestPermission().then(state => {
+      if (state === 'granted') { startGyro(); beginGame(); }
+    }).catch(() => beginGame());
+  } else {
+    startGyro(); beginGame();
+  }
+}
+
+// ─────────────────────────────────────────────
+//  KEYBOARD fallback (desktop)
+// ─────────────────────────────────────────────
+const keys = {};
+window.addEventListener('keydown', e => keys[e.key]=true);
+window.addEventListener('keyup',   e => keys[e.key]=false);
+function applyKeyboard() {
+  if (!gyroAvailable) {
+    if (keys['ArrowLeft']  || keys['a']) tiltX = -1;
+    else if (keys['ArrowRight']|| keys['d']) tiltX =  1;
+    else tiltX *= 0.8;
+    if (keys['ArrowUp']    || keys['w']) tiltY = -1;
+    else if (keys['ArrowDown'] || keys['s']) tiltY =  1;
+    else tiltY *= 0.8;
+  }
+}
+// override updateBall to also read keyboard
+const _origUpdate = updateBall;
+
+// Touch joystick fallback
+let touchOrigin = null;
+canvas.addEventListener('touchstart', e => { if(gyroAvailable) return; const t=e.touches[0]; touchOrigin={x:t.clientX,y:t.clientY}; }, {passive:true});
+canvas.addEventListener('touchmove',  e => {
+  if(gyroAvailable || !touchOrigin) return;
+  const t=e.touches[0];
+  const dx=(t.clientX-touchOrigin.x)/60, dy=(t.clientY-touchOrigin.y)/60;
+  tiltX=Math.max(-1,Math.min(1,dx)); tiltY=Math.max(-1,Math.min(1,dy));
+}, {passive:true});
+canvas.addEventListener('touchend', ()=>{ if(!gyroAvailable){tiltX=0;tiltY=0;} touchOrigin=null; }, {passive:true});
+
+// ─────────────────────────────────────────────
+//  START
+// ─────────────────────────────────────────────
+function beginGame() {
+  splash.style.opacity = '0';
+  setTimeout(()=> splash.style.display='none', 500);
+  resize();
+  initLevel();
+  gameRunning = true;
+  startTimer();
+  loop();
+}
+
+document.getElementById('startBtn').addEventListener('click', () => {
+  if (typeof DeviceOrientationEvent !== 'undefined' &&
+      typeof DeviceOrientationEvent.requestPermission === 'function') {
+    permBanner.classList.add('show');
+  } else {
+    requestGyro();
+  }
+});
+
+document.getElementById('permBtn').addEventListener('click', () => {
+  permBanner.classList.remove('show');
+  requestGyro();
+});
+
+// patch update to include keyboard
+const origLoop = loop;
+function patchedUpdate() {
+  applyKeyboard();
+}
+const origUpdateBall = updateBall;
+window._patchedUpdate = patchedUpdate;
+// insert keyboard into the loop
+const _loop = loop;
+(function() {
+  const original = window.updateBall || (() => {});
+})();
+
+// The updateBall function already runs; we just need keyboard to feed tiltX/Y before it
+const __origLoop = loop;
+// Simply patch: before each frame tick apply keyboard
+function gameLoop() {
+  if (!gameRunning) return;
+  applyKeyboard();
+  updateBall();
+  updateParticles();
+  draw();
+  animId = requestAnimationFrame(gameLoop);
+}
+// replace loop reference
+window.loop = function() {
+  animId = requestAnimationFrame(gameLoop);
+};
+// fix startBtn references
+</script>
+</body>
+</html>
