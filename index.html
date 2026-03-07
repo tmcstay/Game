@@ -3,511 +3,887 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>Tilt & Roll 🌟</title>
+<title>THE SPIRE</title>
 <style>
-  @import url('https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;700;900&display=swap');
-  * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
-  html,body { width:100%; height:100%; overflow:hidden; background:#fdf4ff; font-family:'Fredoka One',cursive; user-select:none; }
+@import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow+Condensed:wght@300;400;600&display=swap');
+*{margin:0;padding:0;box-sizing:border-box;}
+html,body{width:100%;height:100%;overflow:hidden;background:#000;font-family:'Barlow Condensed',sans-serif;}
 
-  #splash {
-    position:fixed; inset:0;
-    background:linear-gradient(160deg,#fde68a 0%,#fbcfe8 40%,#ddd6fe 100%);
-    display:flex; flex-direction:column; align-items:center; justify-content:center;
-    z-index:100; transition:opacity .4s;
-  }
-  #splash .logo      { font-size:3.2rem; color:#7c3aed; text-shadow:4px 4px 0 #f472b6; margin-bottom:8px; }
-  #splash .sub       { font-family:'Nunito',sans-serif; font-weight:700; font-size:1.05rem; color:#6d28d9; margin-bottom:36px; }
-  #splash .emoji-row { font-size:2.6rem; margin-bottom:36px; animation:bob 1s ease-in-out infinite; }
-  @keyframes bob { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-12px)} }
+#canvas{position:fixed;inset:0;width:100%;height:100%;display:block;}
 
-  .btn {
-    font-family:'Fredoka One',cursive; font-size:1.4rem;
-    padding:16px 48px; border:none; border-radius:60px;
-    background:linear-gradient(135deg,#f472b6,#a78bfa); color:#fff; cursor:pointer;
-    box-shadow:0 6px 0 #7c3aed,0 10px 24px rgba(167,139,250,.45);
-    transition:transform .1s,box-shadow .1s; -webkit-appearance:none;
-  }
-  .btn:active { transform:translateY(4px); box-shadow:0 2px 0 #7c3aed; }
+/* ── SPLASH ── */
+#splash{
+  position:fixed;inset:0;z-index:100;
+  background:radial-gradient(ellipse at 50% 30%,#1a1a2e 0%,#000 70%);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  transition:opacity .6s;
+}
+#splash h1{
+  font-family:'Bebas Neue',sans-serif;
+  font-size:clamp(4rem,18vw,7rem);
+  letter-spacing:.15em;
+  color:#fff;
+  text-shadow:0 0 60px rgba(100,200,255,.4),0 0 120px rgba(100,200,255,.15);
+  margin-bottom:.1em;
+}
+#splash .tagline{
+  font-size:clamp(.9rem,3.5vw,1.2rem);
+  font-weight:300;letter-spacing:.4em;text-transform:uppercase;
+  color:rgba(255,255,255,.45);margin-bottom:3.5rem;
+}
+.altitude{
+  font-family:'Bebas Neue',sans-serif;
+  font-size:clamp(1rem,4vw,1.4rem);letter-spacing:.2em;
+  color:rgba(100,200,255,.7);margin-bottom:2.5rem;
+}
+#startBtn{
+  font-family:'Bebas Neue',sans-serif;
+  font-size:clamp(1.1rem,4.5vw,1.5rem);letter-spacing:.25em;
+  padding:14px 52px;border:1px solid rgba(255,255,255,.3);border-radius:2px;
+  background:rgba(255,255,255,.06);color:#fff;cursor:pointer;
+  backdrop-filter:blur(4px);
+  box-shadow:0 0 40px rgba(100,200,255,.15);
+  transition:background .2s,box-shadow .2s;
+}
+#startBtn:active{background:rgba(255,255,255,.15);}
 
-  #permBanner {
-    position:fixed; inset:0;
-    background:linear-gradient(160deg,#fde68a,#fbcfe8 50%,#ddd6fe);
-    display:none; flex-direction:column; align-items:center; justify-content:center;
-    z-index:200; text-align:center; padding:32px;
-  }
-  #permBanner.show { display:flex; }
-  #permBanner .ttl { font-size:2rem; color:#7c3aed; text-shadow:3px 3px 0 #f472b6; margin-bottom:12px; }
-  #permBanner p    { font-family:'Nunito',sans-serif; font-size:1rem; color:#6d28d9; margin-bottom:32px; max-width:280px; }
+/* ── PERM BANNER ── */
+#permBanner{
+  position:fixed;inset:0;z-index:200;
+  background:radial-gradient(ellipse at 50% 30%,#1a1a2e,#000 70%);
+  display:none;flex-direction:column;align-items:center;justify-content:center;
+  text-align:center;padding:2rem;
+}
+#permBanner.show{display:flex;}
+#permBanner h2{font-family:'Bebas Neue',sans-serif;font-size:2.2rem;letter-spacing:.15em;color:#fff;margin-bottom:.8rem;}
+#permBanner p{font-weight:300;font-size:1rem;letter-spacing:.1em;color:rgba(255,255,255,.5);margin-bottom:2.5rem;max-width:280px;line-height:1.7;}
+#permBtn{
+  font-family:'Bebas Neue',sans-serif;font-size:1.3rem;letter-spacing:.25em;
+  padding:14px 48px;border:1px solid rgba(255,255,255,.3);border-radius:2px;
+  background:rgba(255,255,255,.07);color:#fff;cursor:pointer;
+}
 
-  #hud {
-    position:fixed; top:0; left:0; right:0; padding:12px 18px 0;
-    display:flex; justify-content:space-between; align-items:center;
-    z-index:10; pointer-events:none;
-  }
-  #hud span { font-size:1.15rem; }
-  #starDisplay  { color:#7c3aed; }
-  #lvlDisplay   { color:#db2777; }
-  #timerDisplay { color:#059669; }
-  #timerDisplay.low { color:#ef4444; animation:pulse .5s ease-in-out infinite; }
-  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.5} }
+/* ── HUD ── */
+#hud{
+  position:fixed;top:0;left:0;right:0;z-index:10;
+  padding:14px 20px;display:flex;justify-content:space-between;align-items:flex-start;
+  pointer-events:none;
+}
+.hud-box{display:flex;flex-direction:column;gap:2px;}
+.hud-label{font-size:.65rem;letter-spacing:.25em;text-transform:uppercase;color:rgba(255,255,255,.3);}
+.hud-value{font-family:'Bebas Neue',sans-serif;font-size:1.6rem;letter-spacing:.1em;color:#fff;}
+#balanceBar{
+  position:fixed;bottom:0;left:0;right:0;z-index:10;
+  padding:18px 24px;pointer-events:none;
+  display:flex;flex-direction:column;gap:6px;
+}
+.bar-label{font-size:.6rem;letter-spacing:.3em;text-transform:uppercase;color:rgba(255,255,255,.3);text-align:center;}
+.bar-track{height:4px;background:rgba(255,255,255,.1);border-radius:2px;position:relative;overflow:visible;}
+.bar-fill{height:100%;border-radius:2px;background:linear-gradient(90deg,#f59e0b,#ef4444);transition:width .05s;}
+.bar-center{position:absolute;top:-3px;left:50%;width:2px;height:10px;background:rgba(255,255,255,.4);transform:translateX(-50%);}
+.bar-cursor{
+  position:absolute;top:-6px;width:4px;height:16px;
+  background:#fff;border-radius:1px;transform:translateX(-50%);
+  transition:left .05s;box-shadow:0 0 8px rgba(255,255,255,.8);
+}
 
-  #gameCanvas { position:fixed; inset:0; width:100%; height:100%; display:block; touch-action:none; }
-
-  #overlay {
-    position:fixed; inset:0; background:rgba(253,244,255,.9);
-    display:none; flex-direction:column; align-items:center; justify-content:center;
-    z-index:50; backdrop-filter:blur(8px);
-  }
-  #overlay.show { display:flex; }
-  #overlay .big     { font-size:4.5rem; margin-bottom:6px; }
-  #overlay .msg     { font-size:2rem; color:#7c3aed; text-shadow:3px 3px 0 #f472b6; margin-bottom:4px; }
-  #overlay .sub-msg { font-family:'Nunito',sans-serif; font-size:1rem; color:#6d28d9; margin-bottom:32px; }
+/* ── OVERLAY ── */
+#overlay{
+  position:fixed;inset:0;z-index:50;
+  background:rgba(0,0,0,.82);
+  display:none;flex-direction:column;align-items:center;justify-content:center;
+  backdrop-filter:blur(6px);
+}
+#overlay.show{display:flex;}
+#overlay .over-big{font-family:'Bebas Neue',sans-serif;font-size:clamp(3rem,14vw,5.5rem);
+  letter-spacing:.12em;color:#fff;text-shadow:0 0 60px rgba(239,68,68,.5);margin-bottom:.3em;}
+#overlay .over-sub{font-weight:300;font-size:clamp(.9rem,3.5vw,1.1rem);letter-spacing:.3em;
+  text-transform:uppercase;color:rgba(255,255,255,.5);margin-bottom:2.5rem;}
+#overlay .over-score{font-family:'Bebas Neue',sans-serif;font-size:clamp(1.4rem,5vw,2rem);
+  letter-spacing:.15em;color:rgba(100,200,255,.9);margin-bottom:2.5rem;}
+#retryBtn{
+  font-family:'Bebas Neue',sans-serif;font-size:1.3rem;letter-spacing:.25em;
+  padding:14px 48px;border:1px solid rgba(255,255,255,.3);border-radius:2px;
+  background:rgba(255,255,255,.07);color:#fff;cursor:pointer;
+}
 </style>
 </head>
 <body>
 
 <div id="splash">
-  <div class="logo">Tilt &amp; Roll</div>
-  <div class="sub">tilt your phone to guide the star!</div>
-  <div class="emoji-row">🌟✨⭐</div>
-  <button class="btn" id="startBtn">Let's Play!</button>
+  <h1>THE SPIRE</h1>
+  <div class="tagline">828 metres above the ground</div>
+  <div class="altitude">Burj Khalifa · Dubai</div>
+  <button id="startBtn">CLIMB TO THE TOP</button>
 </div>
 
 <div id="permBanner">
-  <div class="ttl">One tap needed!</div>
-  <p>Allow motion so you can tilt &amp; play 🎮</p>
-  <button class="btn" id="permBtn">Allow Motion 📱</button>
+  <h2>ALLOW MOTION</h2>
+  <p>This game requires your device's gyroscope to keep your balance on the spire.</p>
+  <button id="permBtn">GRANT ACCESS</button>
 </div>
 
 <div id="hud">
-  <span id="starDisplay">⭐ 0</span>
-  <span id="lvlDisplay">Level 1</span>
-  <span id="timerDisplay">⏱ 60</span>
+  <div class="hud-box">
+    <span class="hud-label">Altitude</span>
+    <span class="hud-value" id="altDisplay">828m</span>
+  </div>
+  <div class="hud-box" style="align-items:center;">
+    <span class="hud-label">Survived</span>
+    <span class="hud-value" id="timeDisplay">0s</span>
+  </div>
+  <div class="hud-box" style="align-items:flex-end;">
+    <span class="hud-label">Wind</span>
+    <span class="hud-value" id="windDisplay">12 km/h</span>
+  </div>
 </div>
 
-<canvas id="gameCanvas"></canvas>
+<canvas id="canvas"></canvas>
+
+<div id="balanceBar">
+  <div class="bar-label">BALANCE</div>
+  <div class="bar-track" id="barTrackX">
+    <div class="bar-center"></div>
+    <div class="bar-cursor" id="barCursorX" style="left:50%"></div>
+  </div>
+  <div class="bar-track" id="barTrackY" style="margin-top:4px;">
+    <div class="bar-center"></div>
+    <div class="bar-cursor" id="barCursorY" style="left:50%"></div>
+  </div>
+</div>
 
 <div id="overlay">
-  <div class="big"     id="overlayEmoji">🎉</div>
-  <div class="msg"     id="overlayMsg">Level Clear!</div>
-  <div class="sub-msg" id="overlaySub"></div>
-  <button class="btn"  id="nextBtn">Next Level →</button>
+  <div class="over-big" id="overBig">YOU FELL</div>
+  <div class="over-sub" id="overSub">828 metres straight down</div>
+  <div class="over-score" id="overScore">0 seconds</div>
+  <button id="retryBtn">TRY AGAIN</button>
 </div>
 
 <script>
-// ═══════════════════════════════════════════════
-//  SETUP
-// ═══════════════════════════════════════════════
-const canvas = document.getElementById('gameCanvas');
+// ═══════════════════════════════════════════════════════════
+//  CANVAS + GLOBALS
+// ═══════════════════════════════════════════════════════════
+const canvas = document.getElementById('canvas');
 const ctx    = canvas.getContext('2d');
-
 let W, H;
-function resize(){ W = canvas.width = window.innerWidth; H = canvas.height = window.innerHeight; }
+function resize(){ W=canvas.width=window.innerWidth; H=canvas.height=window.innerHeight; }
 resize();
-window.addEventListener('resize', ()=>{ resize(); initLevel(); });
+window.addEventListener('resize', resize);
 
-// ═══════════════════════════════════════════════
-//  MAZES  (0=open 1=wall 2=gem 3=exit)
-//  All verified solvable via BFS
-// ═══════════════════════════════════════════════
-const MAZES = [
-// ── LEVEL 1 ──
-[
- [1,1,1,1,1,1,1,1,1,1,1,1],
- [1,0,0,0,0,0,0,0,0,0,0,1],
- [1,0,1,1,1,1,1,1,1,1,0,1],
- [1,0,1,0,0,2,0,0,0,1,0,1],
- [1,0,1,0,1,1,1,1,0,1,0,1],
- [1,0,1,0,1,0,2,1,0,1,0,1],
- [1,0,1,0,1,0,0,1,0,1,0,1],
- [1,0,1,0,1,1,0,1,0,1,0,1],
- [1,0,1,0,0,0,0,0,0,1,0,1],
- [1,0,1,1,1,1,1,1,1,1,0,1],
- [1,2,0,0,0,0,0,0,0,0,2,1],
- [1,1,1,1,1,1,0,1,1,1,1,1],
- [1,0,0,0,0,0,0,0,0,0,0,1],
- [1,0,1,1,0,1,1,1,0,1,0,1],
- [1,0,1,2,0,0,0,1,0,1,0,1],
- [1,0,1,1,1,1,0,1,0,0,0,1],
- [1,0,0,0,0,0,0,0,1,1,3,1],
- [1,1,1,1,1,1,1,1,1,1,1,1],
-],
-// ── LEVEL 2 ──
-[
- [1,1,1,1,1,1,1,1,1,1,1,1],
- [1,0,0,0,1,0,0,0,0,2,0,1],
- [1,1,1,0,1,0,1,1,1,1,0,1],
- [1,0,0,0,0,0,0,0,0,0,0,1],
- [1,0,1,1,1,1,1,1,1,1,0,1],
- [1,0,0,2,0,0,0,0,0,1,0,1],
- [1,1,1,1,1,1,0,1,0,1,0,1],
- [1,0,0,0,0,1,0,1,0,0,0,1],
- [1,0,1,1,0,0,0,1,1,1,1,1],
- [1,0,1,1,0,1,0,0,0,2,0,1],
- [1,0,0,0,0,1,1,1,1,1,0,1],
- [1,1,1,1,0,0,0,0,0,0,0,1],
- [1,0,0,1,1,1,1,0,1,1,1,1],
- [1,0,2,0,0,0,1,0,0,0,0,1],
- [1,0,1,1,1,0,1,1,1,1,0,1],
- [1,0,0,0,0,0,0,0,0,2,0,1],
- [1,1,1,1,1,1,1,1,1,0,3,1],
- [1,1,1,1,1,1,1,1,1,1,1,1],
-],
-// ── LEVEL 3 (fully connected, verified) ──
-[
- [1,1,1,1,1,1,1,1,1,1,1,1],
- [1,0,0,0,0,0,0,0,0,0,2,1],
- [1,0,1,1,1,0,1,1,1,1,0,1],
- [1,0,1,0,0,0,1,0,0,0,0,1],
- [1,0,1,0,1,1,1,0,1,1,0,1],
- [1,0,0,0,0,0,0,0,1,2,0,1],
- [1,1,1,1,0,1,1,1,1,1,0,1],
- [1,0,0,1,0,0,0,0,0,0,0,1],
- [1,0,1,1,1,1,0,1,1,1,0,1],
- [1,0,0,0,0,1,0,0,0,1,0,1],
- [1,1,1,1,0,1,1,1,0,1,0,1],
- [1,2,0,0,0,0,0,1,0,0,0,1],
- [1,1,1,1,1,1,0,1,0,1,1,1],
- [1,0,0,0,0,0,0,0,0,0,2,1],
- [1,0,1,1,1,1,1,1,1,0,1,1],
- [1,0,0,2,0,0,0,0,1,0,0,1],
- [1,1,1,1,1,1,1,0,0,0,3,1],
- [1,1,1,1,1,1,1,1,1,1,1,1],
-],
-];
+// ═══════════════════════════════════════════════════════════
+//  GYRO / TILT STATE
+// ═══════════════════════════════════════════════════════════
+let tiltX=0, tiltY=0;      // -1 to 1 lean
+let gyroEnabled=false;
 
-// BFS solvability check — warns in console if a maze has no path
-function isReachable(mazeGrid){
-  const rows=mazeGrid.length, cols=mazeGrid[0].length;
-  let start=null;
-  for(let r=0;r<rows&&!start;r++) for(let c=0;c<cols;c++)
-    if(mazeGrid[r][c]!==1){start={r,c};break;}
-  if(!start) return false;
-  const vis=Array.from({length:rows},()=>new Uint8Array(cols));
-  const q=[start]; vis[start.r][start.c]=1;
-  while(q.length){
-    const {r,c}=q.shift();
-    if(mazeGrid[r][c]===3) return true;
-    for(const[dr,dc] of [[-1,0],[1,0],[0,-1],[0,1]]){
-      const nr=r+dr,nc=c+dc;
-      if(nr>=0&&nr<rows&&nc>=0&&nc<cols&&!vis[nr][nc]&&mazeGrid[nr][nc]!==1)
-        {vis[nr][nc]=1;q.push({r:nr,c:nc});}
+// camera lean (smooth)
+let camLeanX=0, camLeanY=0;  // accumulated lean from physics
+let camVX=0,    camVY=0;     // lean velocity
+
+// ═══════════════════════════════════════════════════════════
+//  CITY BUILDINGS  (random seed, generated once)
+// ═══════════════════════════════════════════════════════════
+const rng=(()=>{ let s=42; return ()=>{ s=(s*1664525+1013904223)&0xffffffff; return (s>>>0)/0xffffffff; }; })();
+
+const NUM_BUILDINGS = 260;
+const buildings = [];
+for(let i=0;i<NUM_BUILDINGS;i++){
+  const angle = rng()*Math.PI*2;
+  const dist  = 120 + rng()*1800;
+  buildings.push({
+    angle,
+    dist,
+    width:  18 + rng()*80,
+    depth:  18 + rng()*80,
+    height: 20 + rng()*280,
+    hue:    200 + rng()*40,
+    lit:    rng()>0.45,
+    litCol: `hsl(${40+rng()*20},${60+rng()*30}%,${60+rng()*20}%)`,
+  });
+}
+
+// Road grid lines (top-down, radial + grid)
+const ROADS = [];
+for(let i=0;i<12;i++) ROADS.push({ angle: i/12*Math.PI*2, radial:true });
+for(let i=0;i<5;i++){
+  const r=200+i*300;
+  ROADS.push({ r, radial:false });
+}
+
+// ═══════════════════════════════════════════════════════════
+//  WIND
+// ═══════════════════════════════════════════════════════════
+let windX=0, windY=0;
+let windTimer=0;
+let windSpeed=12;
+function updateWind(dt){
+  windTimer+=dt;
+  if(windTimer>3+Math.random()*4){
+    windTimer=0;
+    windX=(Math.random()-.5)*0.28;
+    windY=(Math.random()-.5)*0.18;
+    windSpeed=Math.round(8+Math.random()*20);
+    document.getElementById('windDisplay').textContent=windSpeed+' km/h';
+  }
+}
+
+// ═══════════════════════════════════════════════════════════
+//  PARTICLES (wind streaks)
+// ═══════════════════════════════════════════════════════════
+const windParticles=[];
+function spawnWind(){
+  if(windParticles.length>60) return;
+  windParticles.push({
+    x: Math.random()*W, y: Math.random()*H*0.6,
+    len: 30+Math.random()*80,
+    speed: 2+Math.random()*4,
+    angle: Math.atan2(windY||.1,windX||.2)+( Math.random()-.5)*.4,
+    alpha: .05+Math.random()*.12,
+    life:1, decay:.015+Math.random()*.025
+  });
+}
+function updateWindParticles(){
+  for(const p of windParticles){
+    p.x+=Math.cos(p.angle)*p.speed;
+    p.y+=Math.sin(p.angle)*p.speed;
+    p.life-=p.decay;
+  }
+  windParticles.splice(0,windParticles.length,...windParticles.filter(p=>p.life>0));
+  if(Math.random()<.35) spawnWind();
+}
+function drawWindParticles(){
+  ctx.save();
+  for(const p of windParticles){
+    ctx.globalAlpha=p.alpha*p.life;
+    ctx.strokeStyle='#a0c8ff';
+    ctx.lineWidth=.7;
+    ctx.beginPath();
+    ctx.moveTo(p.x,p.y);
+    ctx.lineTo(p.x-Math.cos(p.angle)*p.len, p.y-Math.sin(p.angle)*p.len);
+    ctx.stroke();
+  }
+  ctx.restore();
+}
+
+// ═══════════════════════════════════════════════════════════
+//  GAME STATE
+// ═══════════════════════════════════════════════════════════
+let gameRunning=false;
+let survived=0;
+let fallAnim=0;  // 0=none, >0=falling
+let bestTime=0;
+
+// ═══════════════════════════════════════════════════════════
+//  PERSPECTIVE PROJECTION
+//  We look STRAIGHT DOWN. camLeanX/Y tilt the horizon.
+//  Buildings are drawn as top-down rectangles with
+//  a perspective-foreshortened view.
+// ═══════════════════════════════════════════════════════════
+
+// Project world XZ → screen XY
+// camLean shifts the vanishing point, giving the lean effect
+function project(worldX, worldZ, altitude){
+  // altitude = how high above ground (828m for spire top)
+  const FOCAL = H * 0.82;
+  const groundDist = altitude; // metres above ground
+
+  // lean shifts apparent horizon
+  const vanishX = W/2 + camLeanX * W * 0.55;
+  const vanishY = H/2 + camLeanY * H * 0.55;
+
+  // perspective scale: things at worldZ=0 (ground) fill screen
+  // things far away shrink
+  const scale = FOCAL / (groundDist + worldZ*0.001 + 0.001);
+
+  const sx = vanishX + worldX * scale * 0.0016;
+  const sy = vanishY + worldZ * scale * 0.0016;  // Z is depth away
+
+  return {sx, sy, scale};
+}
+
+// ═══════════════════════════════════════════════════════════
+//  DRAW SCENE
+// ═══════════════════════════════════════════════════════════
+let frame=0;
+function draw(){
+  frame++;
+
+  // ── Background sky / haze ──
+  const skyGrad = ctx.createRadialGradient(W/2,H/2,0, W/2,H/2,Math.max(W,H)*0.75);
+  skyGrad.addColorStop(0,'#c8d8f0');
+  skyGrad.addColorStop(0.35,'#a0b8d8');
+  skyGrad.addColorStop(0.7,'#6080a0');
+  skyGrad.addColorStop(1,'#2a3a50');
+  ctx.fillStyle=skyGrad;
+  ctx.fillRect(0,0,W,H);
+
+  // ── Atmospheric haze circle (ground far below) ──
+  const cx = W/2 + camLeanX*W*0.55;
+  const cy = H/2 + camLeanY*H*0.55;
+
+  // Ground plane — huge blurred oval at vanishing point
+  const groundGrad = ctx.createRadialGradient(cx,cy,0,cx,cy,Math.min(W,H)*1.1);
+  groundGrad.addColorStop(0,'rgba(180,190,180,0.55)');
+  groundGrad.addColorStop(0.2,'rgba(140,155,140,0.45)');
+  groundGrad.addColorStop(0.5,'rgba(90,105,90,0.3)');
+  groundGrad.addColorStop(1,'rgba(40,50,60,0)');
+  ctx.fillStyle=groundGrad;
+  ctx.beginPath();
+  ctx.ellipse(cx,cy, Math.min(W,H)*1.1, Math.min(W,H)*0.62, 0,0,Math.PI*2);
+  ctx.fill();
+
+  // ── Draw roads ──
+  ctx.save();
+  ctx.globalAlpha=0.18;
+  ctx.strokeStyle='#f0ead0';
+  ctx.lineWidth=1.2;
+  for(const road of ROADS){
+    if(road.radial){
+      // radial lines from center outward
+      const bx=Math.cos(road.angle)*3000, bz=Math.sin(road.angle)*3000;
+      const p0=project(0,0,828);
+      const p1=project(bx,bz,828);
+      ctx.beginPath();
+      ctx.moveTo(p0.sx,p0.sy);
+      ctx.lineTo(p1.sx,p1.sy);
+      ctx.stroke();
+    } else {
+      // concentric ring roads
+      ctx.beginPath();
+      for(let a=0;a<=Math.PI*2;a+=0.12){
+        const bx=Math.cos(a)*road.r, bz=Math.sin(a)*road.r;
+        const p=project(bx,bz,828);
+        if(a===0) ctx.moveTo(p.sx,p.sy); else ctx.lineTo(p.sx,p.sy);
+      }
+      ctx.closePath();
+      ctx.stroke();
     }
   }
-  return false;
-}
-MAZES.forEach((m,i)=>console.log(`Maze ${i+1} solvable:`,isReachable(m)));
+  ctx.restore();
 
-// ═══════════════════════════════════════════════
-//  PALETTES
-// ═══════════════════════════════════════════════
-const PALETTES=[
-  {bg1:'#fef9c3',bg2:'#fce7f3',wall:'#a855f7',wall2:'#ec4899',ball:'#f472b6',exit:'#34d399'},
-  {bg1:'#e0f2fe',bg2:'#fae8ff',wall:'#3b82f6',wall2:'#8b5cf6',ball:'#a78bfa',exit:'#06b6d4'},
-  {bg1:'#dcfce7',bg2:'#fef9c3',wall:'#16a34a',wall2:'#ca8a04',ball:'#34d399',exit:'#8b5cf6'},
-];
+  // ── Draw buildings (sorted back to front) ──
+  // Sort by dist desc so closer ones overdraw
+  const sorted=[...buildings].sort((a,b)=>b.dist-a.dist);
 
-// ═══════════════════════════════════════════════
-//  STATE
-// ═══════════════════════════════════════════════
-let maze,ROWS,COLS,CELL;
-let gemsCells=[],exitCell=null;
-let ball={x:0,y:0,vx:0,vy:0,r:0};
-let particles=[];
-let gemsCollected=0,totalGems=0;
-let stars=0,level=1,levelIdx=0;
-let timeLeft=60,timerInterval=null;
-let gameRunning=false,animId=null,frame=0;
-let bgGrad;
-let tiltX=0,tiltY=0,gyroEnabled=false;
+  for(const b of sorted){
+    const wx=Math.cos(b.angle)*b.dist;
+    const wz=Math.sin(b.angle)*b.dist;
 
-const OX=()=>(W-COLS*CELL)/2;
-const OY=()=>(H-ROWS*CELL)/2;
+    const ALTITUDE=828;
+    const p=project(wx,wz,ALTITUDE);
 
-// ═══════════════════════════════════════════════
-//  INIT LEVEL
-// ═══════════════════════════════════════════════
-function initLevel(){
-  maze=MAZES[levelIdx%MAZES.length].map(r=>r.slice());
-  ROWS=maze.length; COLS=maze[0].length;
-  CELL=Math.min(Math.floor(W/COLS),Math.floor(H/ROWS));
-  ball.r=CELL*0.33;
-  gemsCells=[]; exitCell=null; gemsCollected=0;
-  for(let r=0;r<ROWS;r++) for(let c=0;c<COLS;c++){
-    if(maze[r][c]===2) gemsCells.push({r,c,collected:false});
-    if(maze[r][c]===3) exitCell={r,c};
+    if(p.sx<-200||p.sx>W+200||p.sy<-200||p.sy>H+200) continue;
+
+    const scaledW=b.width*p.scale*0.0016;
+    const scaledD=b.depth*p.scale*0.0016;
+    const scaledH=b.height*p.scale*0.0016*0.4; // height perspective
+
+    if(scaledW<1.5) continue;
+
+    // Top face (roof) — flat from above
+    ctx.fillStyle=`hsl(${b.hue},18%,${28+b.height*0.04}%)`;
+    ctx.fillRect(p.sx-scaledW/2, p.sy-scaledD/2, scaledW, scaledD);
+
+    // Side faces give 3D illusion
+    // Left shadow face
+    ctx.fillStyle=`hsla(${b.hue},15%,15%,0.55)`;
+    ctx.beginPath();
+    ctx.moveTo(p.sx-scaledW/2, p.sy+scaledD/2);
+    ctx.lineTo(p.sx-scaledW/2, p.sy+scaledD/2+scaledH);
+    ctx.lineTo(p.sx+scaledW/2, p.sy+scaledD/2+scaledH);
+    ctx.lineTo(p.sx+scaledW/2, p.sy+scaledD/2);
+    ctx.fill();
+
+    // Windows glow on lit buildings
+    if(b.lit && scaledW>4){
+      ctx.globalAlpha=0.35;
+      ctx.fillStyle=b.litCol;
+      const cols=Math.max(1,Math.floor(scaledW/3));
+      const rows=Math.max(1,Math.floor(scaledD/3));
+      for(let r=0;r<rows;r++) for(let cc=0;cc<cols;cc++){
+        if(Math.random()<0.55){
+          ctx.fillRect(
+            p.sx-scaledW/2+cc*(scaledW/cols)+0.5,
+            p.sy-scaledD/2+r*(scaledD/rows)+0.5,
+            scaledW/cols-0.8, scaledD/rows-0.8
+          );
+        }
+      }
+      ctx.globalAlpha=1;
+    }
   }
-  totalGems=gemsCells.length;
-  outer: for(let r=1;r<ROWS;r++) for(let c=1;c<COLS;c++)
-    if(maze[r][c]!==1){ball.x=OX()+c*CELL+CELL/2;ball.y=OY()+r*CELL+CELL/2;break outer;}
-  ball.vx=0; ball.vy=0; particles=[]; tiltX=0; tiltY=0;
-  const pal=PALETTES[levelIdx%PALETTES.length];
-  bgGrad=ctx.createLinearGradient(0,0,W,H);
-  bgGrad.addColorStop(0,pal.bg1); bgGrad.addColorStop(1,pal.bg2);
-  document.getElementById('lvlDisplay').textContent=`Level ${level}`;
-  document.getElementById('starDisplay').textContent=`⭐ ${stars}`;
-  clearInterval(timerInterval);
-  timeLeft=60+levelIdx*10;
-  updateTimerDisplay();
+
+  // ── Dubai haze / smog layer ──
+  const hazeGrad=ctx.createRadialGradient(cx,cy+H*.05,0,cx,cy,H*.7);
+  hazeGrad.addColorStop(0,'rgba(210,200,175,0.0)');
+  hazeGrad.addColorStop(0.5,'rgba(180,170,140,0.12)');
+  hazeGrad.addColorStop(1,'rgba(150,140,110,0.35)');
+  ctx.fillStyle=hazeGrad;
+  ctx.fillRect(0,0,W,H);
+
+  // ── Wind streaks ──
+  drawWindParticles();
+
+  // ── Spire / platform ──
+  drawSpire();
+
+  // ── Vignette (darkness at edges for vertigo) ──
+  const vig=ctx.createRadialGradient(W/2,H/2,H*.2,W/2,H/2,Math.max(W,H)*.78);
+  vig.addColorStop(0,'rgba(0,0,0,0)');
+  vig.addColorStop(1,'rgba(0,0,0,0.72)');
+  ctx.fillStyle=vig;
+  ctx.fillRect(0,0,W,H);
+
+  // ── Fall animation overlay ──
+  if(fallAnim>0){
+    ctx.fillStyle=`rgba(0,0,0,${Math.min(1,fallAnim*0.035)})`;
+    ctx.fillRect(0,0,W,H);
+    // zoom rush effect
+    const zoomGrad=ctx.createRadialGradient(W/2,H/2,0,W/2,H/2,W*.5);
+    zoomGrad.addColorStop(0,'rgba(255,255,255,0)');
+    zoomGrad.addColorStop(1,`rgba(255,255,255,${Math.min(.15,fallAnim*.003)})`);
+    ctx.fillStyle=zoomGrad;
+    ctx.fillRect(0,0,W,H);
+  }
 }
 
-function updateTimerDisplay(){
-  const el=document.getElementById('timerDisplay');
-  el.textContent=`⏱ ${timeLeft}`;
-  el.className=timeLeft<=10?'low':'';
+function drawSpire(){
+  const cx = W/2 + camLeanX*W*0.18;
+  const cy = H/2 + camLeanY*H*0.18;
+  const lean = Math.sqrt(camLeanX*camLeanX + camLeanY*camLeanY);
+
+  // ── How far down the building structure extends below us ──
+  // The Burj Khalifa tapers in a series of setback tiers as you
+  // look down. We render them foreshortened — biggest at bottom,
+  // converging toward us at top.
+  const totalDepth = H * 1.05;   // how far down the structure goes
+
+  // Tier definitions: { yFrac (0=us, 1=bottom), halfW, halfD, alpha }
+  // Modelled on Burj Khalifa's actual stepped cross-section
+  const tiers = [
+    { y:1.00, hw:0.310, hd:0.220, col:'#5a6a5a' },  // base / podium
+    { y:0.88, hw:0.220, hd:0.155, col:'#6a7a6a' },
+    { y:0.74, hw:0.165, hd:0.115, col:'#788878' },
+    { y:0.60, hw:0.120, hd:0.085, col:'#8090a0' },
+    { y:0.47, hw:0.088, hd:0.062, col:'#8898a8' },
+    { y:0.35, hw:0.062, hd:0.044, col:'#90a0b0' },
+    { y:0.24, hw:0.042, hd:0.030, col:'#98a8b8' },
+    { y:0.15, hw:0.026, hd:0.019, col:'#a0b0c0' },
+    { y:0.08, hw:0.015, hd:0.011, col:'#b0bec8' },
+    { y:0.03, hw:0.007, hd:0.005, col:'#c0ccd4' },
+  ];
+
+  ctx.save();
+
+  // ── Draw tiers back-to-front (bottom first) ──
+  for(let i=0; i<tiers.length; i++){
+    const t  = tiers[i];
+    const t2 = tiers[i+1] || { y:0, hw:0.003, hd:0.002 };
+
+    const y1 = cy + t.y  * totalDepth;
+    const y2 = cy + t2.y * totalDepth;
+
+    const w1 = t.hw  * W * 2;
+    const w2 = t2.hw * W * 2;
+    const d1 = t.hd  * W * 2;
+    const d2 = t2.hd * W * 2;
+
+    // Only draw if on screen
+    if(y1 < -50) continue;
+
+    // ── Top face of this tier (flat roof looking down) ──
+    // Trapezoidal shape: narrower at top (closer to us), wider at bottom
+    const roofGrad = ctx.createLinearGradient(cx, y2, cx, y1);
+    roofGrad.addColorStop(0, t.col);
+    roofGrad.addColorStop(1, shadeColStr(t.col, -18));
+    ctx.fillStyle = roofGrad;
+    ctx.beginPath();
+    ctx.moveTo(cx - w2/2, y1);
+    ctx.lineTo(cx + w2/2, y1);
+    ctx.lineTo(cx + w1/2, y2);  // wait — bottom is WIDER (further away = more perspective)
+    ctx.lineTo(cx - w1/2, y2);
+    ctx.closePath();
+    ctx.fill();
+
+    // ── Setback edge — the ledge between tiers ──
+    if(i < tiers.length-1){
+      const ledgeH = Math.max(2, (y1-y2)*0.04);
+      ctx.fillStyle = shadeColStr(t.col, 20);
+      ctx.fillRect(cx - w2/2, y1 - ledgeH, w2, ledgeH);
+    }
+
+    // ── Window grid on each tier face ──
+    if(w2 > 8 && y1-y2 > 6){
+      ctx.save();
+      ctx.globalAlpha = 0.22;
+      const cols = Math.max(2, Math.floor(w2/14));
+      const rows = Math.max(1, Math.floor((y1-y2)/10));
+      for(let r=0;r<rows;r++){
+        for(let c=0;c<cols;c++){
+          const wx = cx - w2/2 + (c+0.5)*(w2/cols);
+          const wy = y2 + (r+0.5)*((y1-y2)/rows);
+          const ww = w2/cols * 0.55;
+          const wh = (y1-y2)/rows * 0.55;
+          // window colour shifts: blue glass
+          ctx.fillStyle = `hsl(210,${30+r*5}%,${55+c*3}%)`;
+          ctx.fillRect(wx-ww/2, wy-wh/2, ww, wh);
+        }
+      }
+      ctx.restore();
+    }
+
+    // ── Left + right side faces (shadow) ──
+    ctx.fillStyle = `rgba(0,0,0,0.28)`;
+    // Left face
+    ctx.beginPath();
+    ctx.moveTo(cx - w2/2, y1);
+    ctx.lineTo(cx - w1/2, y2);
+    ctx.lineTo(cx - w1/2 + 3, y2);
+    ctx.lineTo(cx - w2/2 + 3, y1);
+    ctx.closePath();
+    ctx.fill();
+    // Right face (highlight)
+    ctx.fillStyle = `rgba(255,255,255,0.08)`;
+    ctx.beginPath();
+    ctx.moveTo(cx + w2/2, y1);
+    ctx.lineTo(cx + w1/2, y2);
+    ctx.lineTo(cx + w1/2 - 3, y2);
+    ctx.lineTo(cx + w2/2 - 3, y1);
+    ctx.closePath();
+    ctx.fill();
+  }
+
+  // ── Central needle / antenna going down ──
+  const needleW = 3.5;
+  const needleBot = cy + totalDepth * 1.02;
+  const needleGrad = ctx.createLinearGradient(0, cy, 0, needleBot);
+  needleGrad.addColorStop(0,   '#d8dde2');
+  needleGrad.addColorStop(0.15,'#a8b0b8');
+  needleGrad.addColorStop(0.5, '#7a8490');
+  needleGrad.addColorStop(1,   'rgba(60,70,80,0)');
+  ctx.fillStyle = needleGrad;
+  ctx.beginPath();
+  ctx.moveTo(cx - needleW, cy);
+  ctx.lineTo(cx + needleW, cy);
+  ctx.lineTo(cx + needleW*0.3, needleBot);
+  ctx.lineTo(cx - needleW*0.3, needleBot);
+  ctx.fill();
+
+  // Needle centre line highlight
+  ctx.strokeStyle = 'rgba(255,255,255,0.25)';
+  ctx.lineWidth = 0.8;
+  ctx.beginPath();
+  ctx.moveTo(cx, cy);
+  ctx.lineTo(cx, needleBot * 0.6);
+  ctx.stroke();
+
+  // ── Observation deck rings ──
+  const deckPositions = [0.15, 0.35, 0.55];
+  for(const dp of deckPositions){
+    const dy = cy + dp * totalDepth;
+    const dtier = tiers.find(t=>t.y>=dp) || tiers[tiers.length-1];
+    const dw = dtier.hw * W * 1.9;
+    ctx.save();
+    ctx.globalAlpha = 0.55;
+    ctx.strokeStyle = '#c8d0d8';
+    ctx.lineWidth = 1.5;
+    ctx.beginPath();
+    ctx.ellipse(cx, dy, dw/2, dw*0.08, 0, 0, Math.PI*2);
+    ctx.stroke();
+    ctx.restore();
+  }
+
+  // ── Platform at very top (where player stands) ──
+  const tipR = 16 + lean * 7;
+  ctx.save();
+  ctx.translate(cx, cy);
+  ctx.rotate(camLeanX * 0.12);
+
+  // Platform drop shadow
+  ctx.fillStyle = 'rgba(0,0,0,0.3)';
+  ctx.beginPath();
+  ctx.ellipse(3, 5, tipR*1.15, tipR*0.32, 0, 0, Math.PI*2);
+  ctx.fill();
+
+  // Platform surface — small octagonal metal pad
+  const platGrad = ctx.createRadialGradient(-tipR*.25, -tipR*.25, 0, 0, 0, tipR*1.3);
+  platGrad.addColorStop(0,   '#e8eaec');
+  platGrad.addColorStop(0.4, '#b8bec4');
+  platGrad.addColorStop(1,   '#6a7278');
+  ctx.fillStyle = platGrad;
+  // Octagon
+  ctx.beginPath();
+  for(let i=0;i<8;i++){
+    const a = (i/8)*Math.PI*2 - Math.PI/8;
+    const px = Math.cos(a)*tipR, py = Math.sin(a)*tipR*0.36;
+    i===0 ? ctx.moveTo(px,py) : ctx.lineTo(px,py);
+  }
+  ctx.closePath();
+  ctx.fill();
+
+  // Grip lines on platform
+  ctx.strokeStyle = 'rgba(255,255,255,0.18)';
+  ctx.lineWidth = 0.6;
+  for(let i=-2;i<=2;i++){
+    ctx.beginPath();
+    ctx.moveTo(i*(tipR/2.5) - tipR*0.5, -tipR*0.12);
+    ctx.lineTo(i*(tipR/2.5) + tipR*0.5,  tipR*0.12);
+    ctx.stroke();
+  }
+
+  // Safety rail hint (tiny)
+  ctx.strokeStyle = 'rgba(180,180,180,0.5)';
+  ctx.lineWidth = 1;
+  ctx.beginPath();
+  ctx.ellipse(0, 0, tipR*0.92, tipR*0.3, 0, 0, Math.PI*2);
+  ctx.stroke();
+
+  // ── Player figure (top-down) ──
+  ctx.translate(camLeanX*tipR*0.45, camLeanY*tipR*0.2);
+
+  // Body shadow
+  ctx.fillStyle = 'rgba(0,0,0,0.38)';
+  ctx.beginPath();
+  ctx.ellipse(2, 4, 8, 3, 0, 0, Math.PI*2);
+  ctx.fill();
+
+  // Jacket / body (top-down: we see shoulders + back)
+  const bodyGrad = ctx.createRadialGradient(0, 3, 0, 0, 5, 12);
+  bodyGrad.addColorStop(0, '#4a5a7a');
+  bodyGrad.addColorStop(1, '#2a3a5a');
+  ctx.fillStyle = bodyGrad;
+  ctx.beginPath();
+  ctx.ellipse(0, 6, 9, 5.5, 0, 0, Math.PI);
+  ctx.fill();
+
+  // Head
+  const headGrad = ctx.createRadialGradient(-1.5, -1.5, 0, 0, 0, 7.5);
+  headGrad.addColorStop(0, '#f5d0a8');
+  headGrad.addColorStop(1, '#c8906a');
+  ctx.fillStyle = headGrad;
+  ctx.beginPath();
+  ctx.arc(0, 0, 6.8, 0, Math.PI*2);
+  ctx.fill();
+
+  // Hair
+  ctx.fillStyle = '#1a1008';
+  ctx.beginPath();
+  ctx.ellipse(0, -1.5, 5.5, 4.5, 0, 0, Math.PI);
+  ctx.fill();
+  ctx.beginPath();
+  ctx.ellipse(-5, 0, 2, 3.5, -0.3, 0, Math.PI);
+  ctx.fill();
+  ctx.beginPath();
+  ctx.ellipse( 5, 0, 2, 3.5,  0.3, 0, Math.PI);
+  ctx.fill();
+
+  ctx.restore();
+  ctx.restore();
+
+  // ── Fear pulse ──
+  if(lean > 0.5){
+    const pulse = 0.5 + 0.5*Math.sin(Date.now()*0.014);
+    ctx.fillStyle = `rgba(239,68,68,${(lean-0.5)*0.55*pulse})`;
+    ctx.fillRect(0,0,W,H);
+  }
 }
 
-function startTimer(){
-  clearInterval(timerInterval);
-  timerInterval=setInterval(()=>{
+// helper: lighten/darken a css hsl colour string by offset
+function shadeColStr(col, offset){
+  // parse hex #rrggbb
+  const v=parseInt(col.replace('#',''),16);
+  const r=Math.min(255,Math.max(0,((v>>16)&0xff)+offset));
+  const g=Math.min(255,Math.max(0,((v>>8)&0xff)+offset));
+  const b=Math.min(255,Math.max(0,(v&0xff)+offset));
+  return `rgb(${r},${g},${b})`;
+}
+
+// ═══════════════════════════════════════════════════════════
+//  PHYSICS — balance model
+// ═══════════════════════════════════════════════════════════
+const LEAN_GRAVITY  = 0.0045;  // tilt pulls you further off-centre
+const LEAN_FRICTION = 0.975;   // inertia
+const LEAN_CORRECT  = 0.012;   // gyro correction strength
+const LEAN_WIND     = 0.0008;  // wind nudge
+const FALL_THRESH   = 1.0;     // lean magnitude before falling
+
+let lastTime=0;
+function physicsStep(dt){
+  if(!gameRunning) return;
+
+  // Wind pushes
+  camVX += windX * LEAN_WIND * dt * 60;
+  camVY += windY * LEAN_WIND * dt * 60;
+
+  // Tilt makes lean worse (leaning = unbalanced state compounds)
+  camVX += camLeanX * LEAN_GRAVITY * dt * 60;
+  camVY += camLeanY * LEAN_GRAVITY * dt * 60;
+
+  // Gyro input corrects lean
+  camVX -= tiltX * LEAN_CORRECT * dt * 60;
+  camVY -= tiltY * LEAN_CORRECT * dt * 60;
+
+  // Friction
+  camVX *= Math.pow(LEAN_FRICTION, dt*60);
+  camVY *= Math.pow(LEAN_FRICTION, dt*60);
+
+  camLeanX += camVX;
+  camLeanY += camVY;
+
+  // Update balance bars
+  const bx=Math.max(0,Math.min(100,50+camLeanX*45));
+  const by=Math.max(0,Math.min(100,50+camLeanY*45));
+  document.getElementById('barCursorX').style.left=bx+'%';
+  document.getElementById('barCursorY').style.left=by+'%';
+
+  // Colour bar by danger
+  const danger=Math.sqrt(camLeanX**2+camLeanY**2);
+  const barCol=danger<0.3?'#22c55e':danger<0.65?'#f59e0b':'#ef4444';
+  document.getElementById('barCursorX').style.background=barCol;
+  document.getElementById('barCursorY').style.background=barCol;
+
+  // Check fall
+  if(Math.sqrt(camLeanX**2+camLeanY**2)>FALL_THRESH){
+    triggerFall();
+  }
+}
+
+// ═══════════════════════════════════════════════════════════
+//  TIMER
+// ═══════════════════════════════════════════════════════════
+let survivalTimer=null;
+function startSurvivalTimer(){
+  survived=0;
+  clearInterval(survivalTimer);
+  survivalTimer=setInterval(()=>{
     if(!gameRunning) return;
-    timeLeft--; updateTimerDisplay();
-    if(timeLeft<=0){clearInterval(timerInterval);triggerGameOver();}
+    survived++;
+    document.getElementById('timeDisplay').textContent=survived+'s';
+    // Wind gets stronger over time
+    if(survived%20===0){
+      windSpeed=Math.min(80,windSpeed+5);
+    }
   },1000);
 }
 
-// ═══════════════════════════════════════════════
-//  PHYSICS  — fast & smooth with sub-steps
-// ═══════════════════════════════════════════════
-const GRAVITY  = 0.38;
-const FRICTION = 0.945;
-const MAX_SPD  = 9;
-const SUBSTEPS = 3;
-
-function updateBall(){
-  const ox=OX(), oy=OY();
-  for(let s=0;s<SUBSTEPS;s++){
-    ball.vx += tiltX*(GRAVITY/SUBSTEPS);
-    ball.vy += tiltY*(GRAVITY/SUBSTEPS);
-    ball.vx *= Math.pow(FRICTION,1/SUBSTEPS);
-    ball.vy *= Math.pow(FRICTION,1/SUBSTEPS);
-    ball.vx  = Math.max(-MAX_SPD,Math.min(MAX_SPD,ball.vx));
-    ball.vy  = Math.max(-MAX_SPD,Math.min(MAX_SPD,ball.vy));
-    const r2=ball.r*0.72;
-
-    // X move
-    const nx=ball.x+ball.vx/SUBSTEPS;
-    let bx=false;
-    for(const[px,py] of [[nx-r2,ball.y-r2],[nx+r2,ball.y-r2],[nx-r2,ball.y+r2],[nx+r2,ball.y+r2]]){
-      const gc=Math.floor((px-ox)/CELL),gr=Math.floor((py-oy)/CELL);
-      if(gr<0||gr>=ROWS||gc<0||gc>=COLS||maze[gr][gc]===1){bx=true;break;}
-    }
-    if(!bx) ball.x=nx; else ball.vx*=-0.22;
-
-    // Y move
-    const ny=ball.y+ball.vy/SUBSTEPS;
-    let by=false;
-    for(const[px,py] of [[ball.x-r2,ny-r2],[ball.x+r2,ny-r2],[ball.x-r2,ny+r2],[ball.x+r2,ny+r2]]){
-      const gc=Math.floor((px-ox)/CELL),gr=Math.floor((py-oy)/CELL);
-      if(gr<0||gr>=ROWS||gc<0||gc>=COLS||maze[gr][gc]===1){by=true;break;}
-    }
-    if(!by) ball.y=ny; else ball.vy*=-0.22;
-  }
-
-  // pickups + exit
-  const ox2=OX(),oy2=OY();
-  for(const g of gemsCells){
-    if(g.collected) continue;
-    const gx=ox2+g.c*CELL+CELL/2,gy=oy2+g.r*CELL+CELL/2;
-    if(Math.hypot(ball.x-gx,ball.y-gy)<CELL*0.5){
-      g.collected=true; gemsCollected++; stars++;
-      document.getElementById('starDisplay').textContent=`⭐ ${stars}`;
-      spawnParticles(gx,gy,'#fbbf24');
-    }
-  }
-  if(exitCell){
-    const ex=ox2+exitCell.c*CELL+CELL/2,ey=oy2+exitCell.r*CELL+CELL/2;
-    if(Math.hypot(ball.x-ex,ball.y-ey)<CELL*0.55) triggerLevelWin();
-  }
-}
-
-// ═══════════════════════════════════════════════
-//  PARTICLES
-// ═══════════════════════════════════════════════
-function spawnParticles(x,y,color){
-  for(let i=0;i<16;i++){
-    const a=Math.random()*Math.PI*2,sp=2+Math.random()*4;
-    particles.push({x,y,vx:Math.cos(a)*sp,vy:Math.sin(a)*sp-2,
-      life:1,decay:.028+Math.random()*.02,r:3+Math.random()*5,color,
-      emoji:Math.random()<.35?['⭐','✨','💫'][0|Math.random()*3]:null});
-  }
-}
-function updateParticles(){
-  for(const p of particles){p.x+=p.vx;p.y+=p.vy;p.vy+=.1;p.life-=p.decay;}
-  particles=particles.filter(p=>p.life>0);
-}
-function drawParticles(){
-  for(const p of particles){
-    ctx.save();ctx.globalAlpha=p.life;
-    if(p.emoji){ctx.font=`${p.r*2.8}px serif`;ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(p.emoji,p.x,p.y);}
-    else{ctx.fillStyle=p.color;ctx.beginPath();ctx.arc(p.x,p.y,p.r*p.life,0,Math.PI*2);ctx.fill();}
-    ctx.restore();
-  }
-}
-
-// ═══════════════════════════════════════════════
-//  DRAW
-// ═══════════════════════════════════════════════
-function rr(x,y,w,h,r){
-  ctx.moveTo(x+r,y);ctx.lineTo(x+w-r,y);ctx.arcTo(x+w,y,x+w,y+r,r);
-  ctx.lineTo(x+w,y+h-r);ctx.arcTo(x+w,y+h,x+w-r,y+h,r);
-  ctx.lineTo(x+r,y+h);ctx.arcTo(x,y+h,x,y+h-r,r);
-  ctx.lineTo(x,y+r);ctx.arcTo(x,y,x+r,y,r);ctx.closePath();
-}
-function shade(hex,n){
-  const v=parseInt(hex.replace('#',''),16);
-  return `rgb(${Math.min(255,Math.max(0,((v>>16)&0xff)+n))},${Math.min(255,Math.max(0,((v>>8)&0xff)+n))},${Math.min(255,Math.max(0,(v&0xff)+n))})`;
-}
-
-function draw(){
-  frame++;
-  ctx.clearRect(0,0,W,H);
-  ctx.fillStyle=bgGrad;ctx.fillRect(0,0,W,H);
-  const ox=OX(),oy=OY();
-  const pal=PALETTES[levelIdx%PALETTES.length];
-
-  for(let r=0;r<ROWS;r++) for(let c=0;c<COLS;c++){
-    const x=ox+c*CELL,y=oy+r*CELL,cell=maze[r][c];
-    if(cell===1){
-      const g=ctx.createLinearGradient(x,y,x+CELL,y+CELL);
-      g.addColorStop(0,pal.wall);g.addColorStop(1,pal.wall2);
-      ctx.fillStyle=g;ctx.beginPath();rr(x+1,y+1,CELL-2,CELL-2,5);ctx.fill();
-      ctx.fillStyle='rgba(255,255,255,.15)';ctx.beginPath();rr(x+2,y+2,CELL*.5,CELL*.22,3);ctx.fill();
-    }
-    if(cell===2){
-      const gem=gemsCells.find(g=>g.r===r&&g.c===c);
-      if(gem&&!gem.collected){
-        const p=1+Math.sin(frame*.13+r+c)*.13;
-        ctx.save();ctx.translate(x+CELL/2,y+CELL/2);ctx.scale(p,p);
-        ctx.font=`${CELL*.54}px serif`;ctx.textAlign='center';ctx.textBaseline='middle';
-        ctx.fillText('⭐',0,0);ctx.restore();
-      }
-    }
-    if(cell===3){
-      const p=.88+Math.sin(frame*.09)*.12;
-      ctx.save();ctx.translate(x+CELL/2,y+CELL/2);
-      const grd=ctx.createRadialGradient(0,0,0,0,0,CELL*.7);
-      grd.addColorStop(0,pal.exit+'bb');grd.addColorStop(1,'transparent');
-      ctx.fillStyle=grd;ctx.beginPath();ctx.arc(0,0,CELL*.72,0,Math.PI*2);ctx.fill();
-      ctx.scale(p,p);ctx.font=`${CELL*.65}px serif`;ctx.textAlign='center';ctx.textBaseline='middle';
-      ctx.fillText('🌈',0,0);ctx.restore();
-    }
-  }
-
-  // shadow
-  ctx.fillStyle='rgba(0,0,0,.09)';
-  ctx.beginPath();ctx.ellipse(ball.x,ball.y+ball.r*.72,ball.r*.88,ball.r*.32,0,0,Math.PI*2);ctx.fill();
-
-  // ball
-  const bg=ctx.createRadialGradient(ball.x-ball.r*.32,ball.y-ball.r*.38,ball.r*.04,ball.x,ball.y,ball.r);
-  bg.addColorStop(0,'#fff');bg.addColorStop(.28,pal.ball);bg.addColorStop(1,shade(pal.ball,-40));
-  ctx.beginPath();ctx.arc(ball.x,ball.y,ball.r,0,Math.PI*2);
-  ctx.fillStyle=bg;ctx.fill();
-  ctx.font=`${ball.r*1.38}px serif`;ctx.textAlign='center';ctx.textBaseline='middle';
-  ctx.fillText('😊',ball.x,ball.y+ball.r*.06);
-
-  drawParticles();
-  if(totalGems>0){
-    ctx.font='bold 13px Fredoka One,cursive';ctx.fillStyle='#7c3aed';ctx.textAlign='right';
-    ctx.fillText(`💎 ${gemsCollected}/${totalGems}`,ox+COLS*CELL-4,oy+ROWS*CELL+17);
-  }
-}
-
-// ═══════════════════════════════════════════════
-//  GAME LOOP
-// ═══════════════════════════════════════════════
-function gameLoop(){
+// ═══════════════════════════════════════════════════════════
+//  FALL
+// ═══════════════════════════════════════════════════════════
+function triggerFall(){
   if(!gameRunning) return;
-  applyKeyboard();
-  updateBall();
-  updateParticles();
+  gameRunning=false;
+  clearInterval(survivalTimer);
+  fallAnim=1;
+  if(survived>bestTime) bestTime=survived;
+
+  // animate the fall for a second then show overlay
+  const fallLoop=setInterval(()=>{
+    fallAnim++;
+    if(fallAnim>40){
+      clearInterval(fallLoop);
+      showGameOver();
+    }
+  },40);
+}
+
+function showGameOver(){
+  document.getElementById('overBig').textContent='YOU FELL';
+  document.getElementById('overSub').textContent='828 metres straight down';
+  document.getElementById('overScore').textContent=survived+'s — Best: '+bestTime+'s';
+  document.getElementById('overlay').classList.add('show');
+}
+
+// ═══════════════════════════════════════════════════════════
+//  MAIN LOOP
+// ═══════════════════════════════════════════════════════════
+let animId=null;
+function gameLoop(ts){
+  const dt=Math.min(0.05,(ts-lastTime)/1000||0.016);
+  lastTime=ts;
+
+  updateWind(dt);
+  updateWindParticles();
+  physicsStep(dt);
   draw();
+
   animId=requestAnimationFrame(gameLoop);
 }
-function startLoop(){ cancelAnimationFrame(animId); animId=requestAnimationFrame(gameLoop); }
 
-// ═══════════════════════════════════════════════
-//  WIN / LOSE
-// ═══════════════════════════════════════════════
-function triggerLevelWin(){
-  if(!gameRunning) return;
-  gameRunning=false; clearInterval(timerInterval); cancelAnimationFrame(animId);
-  spawnParticles(ball.x,ball.y,'#fbbf24'); draw();
-  document.getElementById('overlayEmoji').textContent='🎉';
-  document.getElementById('overlayMsg').textContent='Level Clear!';
-  document.getElementById('overlaySub').textContent=`+${gemsCollected} gems • ${timeLeft}s left`;
-  document.getElementById('nextBtn').textContent=levelIdx+1<MAZES.length?'Next Level →':'Play Again 🔄';
-  document.getElementById('overlay').classList.add('show');
-}
-function triggerGameOver(){
-  if(!gameRunning) return;
-  gameRunning=false; clearInterval(timerInterval); cancelAnimationFrame(animId);
-  document.getElementById('overlayEmoji').textContent='⏰';
-  document.getElementById('overlayMsg').textContent="Time's Up!";
-  document.getElementById('overlaySub').textContent=`You collected ${gemsCollected} gems`;
-  document.getElementById('nextBtn').textContent='Try Again 🔄';
-  document.getElementById('overlay').classList.add('show');
-}
-document.getElementById('nextBtn').addEventListener('click',()=>{
-  document.getElementById('overlay').classList.remove('show');
-  const won=document.getElementById('overlayEmoji').textContent==='🎉';
-  if(won&&levelIdx+1<MAZES.length){levelIdx++;level++;}
-  else if(won){levelIdx=0;level=1;stars=0;}
-  resize(); initLevel();
-  gameRunning=true; startTimer(); startLoop();
-});
-
-// ═══════════════════════════════════════════════
-//  INPUT
-// ═══════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════════
+//  GYROSCOPE
+// ═══════════════════════════════════════════════════════════
 function attachGyro(){
   window.addEventListener('deviceorientation',e=>{
-    tiltX=Math.max(-1,Math.min(1,(e.gamma||0)/35));
-    tiltY=Math.max(-1,Math.min(1,((e.beta||0)-15)/35));
+    tiltX=Math.max(-1,Math.min(1,(e.gamma||0)/30));
+    tiltY=Math.max(-1,Math.min(1,((e.beta||0)-15)/30));
   },true);
   gyroEnabled=true;
 }
 
-let touchOrigin=null;
-canvas.addEventListener('touchstart',e=>{if(gyroEnabled)return;const t=e.touches[0];touchOrigin={x:t.clientX,y:t.clientY};},{passive:true});
-canvas.addEventListener('touchmove', e=>{if(gyroEnabled||!touchOrigin)return;const t=e.touches[0];tiltX=Math.max(-1,Math.min(1,(t.clientX-touchOrigin.x)/55));tiltY=Math.max(-1,Math.min(1,(t.clientY-touchOrigin.y)/55));},{passive:true});
-canvas.addEventListener('touchend', ()=>{if(!gyroEnabled){tiltX=0;tiltY=0;}touchOrigin=null;},{passive:true});
-
+// Keyboard fallback
 const keys={};
 window.addEventListener('keydown',e=>keys[e.key]=true);
 window.addEventListener('keyup',  e=>keys[e.key]=false);
 function applyKeyboard(){
   if(gyroEnabled) return;
-  if     (keys['ArrowLeft'] ||keys['a']) tiltX=Math.max(-1,tiltX-.2);
-  else if(keys['ArrowRight']||keys['d']) tiltX=Math.min( 1,tiltX+.2);
-  else tiltX*=.72;
-  if     (keys['ArrowUp']   ||keys['w']) tiltY=Math.max(-1,tiltY-.2);
-  else if(keys['ArrowDown'] ||keys['s']) tiltY=Math.min( 1,tiltY+.2);
-  else tiltY*=.72;
+  if(keys['ArrowLeft'] ||keys['a']) tiltX=-.7;
+  else if(keys['ArrowRight']||keys['d']) tiltX=.7;
+  else tiltX=0;
+  if(keys['ArrowUp']||keys['w']) tiltY=-.7;
+  else if(keys['ArrowDown']||keys['s']) tiltY=.7;
+  else tiltY=0;
 }
 
-// ═══════════════════════════════════════════════
-//  START
-// ═══════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════════
+//  START / RESTART
+// ═══════════════════════════════════════════════════════════
 function beginGame(){
-  const sp=document.getElementById('splash');
-  sp.style.opacity='0'; setTimeout(()=>sp.style.display='none',450);
-  resize(); initLevel(); gameRunning=true; startTimer(); startLoop();
+  document.getElementById('splash').style.opacity='0';
+  setTimeout(()=>document.getElementById('splash').style.display='none',500);
+  camLeanX=0; camLeanY=0; camVX=0; camVY=0;
+  tiltX=0; tiltY=0; fallAnim=0;
+  windX=0; windY=0; windSpeed=12;
+  gameRunning=true;
+  startSurvivalTimer();
+  cancelAnimationFrame(animId);
+  animId=requestAnimationFrame(gameLoop);
 }
+
+function restartGame(){
+  document.getElementById('overlay').classList.remove('show');
+  camLeanX=0; camLeanY=0; camVX=0; camVY=0;
+  tiltX=0; tiltY=0; fallAnim=0;
+  windX=0; windY=0; windSpeed=12;
+  gameRunning=true;
+  startSurvivalTimer();
+}
+
+document.getElementById('retryBtn').addEventListener('click',restartGame);
+
 function requestGyroPermission(){
-  if(typeof DeviceOrientationEvent!=='undefined'&&typeof DeviceOrientationEvent.requestPermission==='function'){
-    DeviceOrientationEvent.requestPermission().then(s=>{if(s==='granted')attachGyro();beginGame();}).catch(()=>beginGame());
-  } else { attachGyro(); beginGame(); }
+  if(typeof DeviceOrientationEvent!=='undefined'&&
+     typeof DeviceOrientationEvent.requestPermission==='function'){
+    DeviceOrientationEvent.requestPermission()
+      .then(s=>{ if(s==='granted') attachGyro(); beginGame(); })
+      .catch(()=>beginGame());
+  } else {
+    attachGyro(); beginGame();
+  }
 }
+
 document.getElementById('startBtn').addEventListener('click',()=>{
-  if(typeof DeviceOrientationEvent!=='undefined'&&typeof DeviceOrientationEvent.requestPermission==='function')
+  if(typeof DeviceOrientationEvent!=='undefined'&&
+     typeof DeviceOrientationEvent.requestPermission==='function'){
     document.getElementById('permBanner').classList.add('show');
-  else requestGyroPermission();
+  } else { requestGyroPermission(); }
 });
 document.getElementById('permBtn').addEventListener('click',()=>{
   document.getElementById('permBanner').classList.remove('show');
   requestGyroPermission();
 });
+
+// Pre-render loop even on splash for atmosphere
+animId=requestAnimationFrame(gameLoop);
 </script>
 </body>
 </html>
