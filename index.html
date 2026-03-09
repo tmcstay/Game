@@ -3,968 +3,586 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
-<title>THE SPIRE</title>
+<title>EVENT HORIZON</title>
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow+Condensed:ital,wght@0,300;0,400;0,600;1,300&display=swap');
-*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
-html,body{width:100%;height:100%;overflow:hidden;background:#0a0a0a;touch-action:none;}
-canvas{position:fixed;inset:0;width:100%;height:100%;display:block;}
+@import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Space+Mono:wght@400;700&display=swap');
+*{margin:0;padding:0;box-sizing:border-box;}
+html,body{width:100%;height:100%;overflow:hidden;background:#000;touch-action:none;}
+canvas{position:fixed;inset:0;display:block;}
 
-/* SPLASH */
 #splash{
-  position:fixed;inset:0;z-index:100;
+  position:fixed;inset:0;z-index:100;background:#000;
   display:flex;flex-direction:column;align-items:center;justify-content:center;
-  background:#000;
-  transition:opacity .8s ease;
+  transition:opacity .8s;
 }
 #splash h1{
   font-family:'Bebas Neue',sans-serif;
-  font-size:clamp(5rem,22vw,9rem);
-  letter-spacing:.12em;color:#fff;
-  text-shadow:0 0 80px rgba(255,200,80,.25);
-  line-height:1;margin-bottom:.05em;
+  font-size:clamp(3.5rem,18vw,7.5rem);
+  letter-spacing:.18em;color:#fff;
+  text-shadow:0 0 60px rgba(120,80,255,.5),0 0 120px rgba(80,40,200,.25);
+  margin-bottom:.1em;
 }
 #splash .sub{
-  font-family:'Barlow Condensed',sans-serif;font-weight:300;
-  font-size:clamp(.75rem,3vw,1rem);letter-spacing:.55em;
-  color:rgba(255,255,255,.35);text-transform:uppercase;margin-bottom:.6rem;
-}
-#splash .stat{
-  font-family:'Bebas Neue',sans-serif;font-size:clamp(1rem,4vw,1.4rem);
-  letter-spacing:.2em;color:rgba(255,190,60,.75);margin-bottom:3rem;
+  font-family:'Space Mono',monospace;font-size:clamp(.55rem,2.2vw,.78rem);
+  letter-spacing:.22em;color:rgba(255,255,255,.28);text-transform:uppercase;
+  margin-bottom:3.5rem;
 }
 #startBtn{
-  font-family:'Bebas Neue',sans-serif;font-size:clamp(1rem,4.5vw,1.4rem);
-  letter-spacing:.3em;padding:15px 52px;
-  border:1px solid rgba(255,255,255,.25);border-radius:2px;
-  background:rgba(255,255,255,.05);color:#fff;cursor:pointer;
-  box-shadow:0 0 40px rgba(255,190,60,.1);
-  -webkit-appearance:none;
+  font-family:'Bebas Neue',sans-serif;font-size:clamp(1rem,4vw,1.35rem);
+  letter-spacing:.3em;padding:14px 50px;
+  border:1px solid rgba(120,80,255,.4);border-radius:1px;
+  background:rgba(120,80,255,.08);color:#fff;cursor:pointer;
+  box-shadow:0 0 40px rgba(120,80,255,.15);-webkit-appearance:none;
+  transition:background .2s;
 }
-#startBtn:active{background:rgba(255,255,255,.12);}
+#startBtn:active{background:rgba(120,80,255,.22);}
 
-/* PERM */
 #permBanner{
   position:fixed;inset:0;z-index:200;background:#000;
   display:none;flex-direction:column;align-items:center;justify-content:center;
   text-align:center;padding:2rem;
 }
 #permBanner.show{display:flex;}
-#permBanner h2{font-family:'Bebas Neue',sans-serif;font-size:2.4rem;letter-spacing:.15em;color:#fff;margin-bottom:.6rem;}
-#permBanner p{font-family:'Barlow Condensed',sans-serif;font-weight:300;font-size:1rem;
-  letter-spacing:.1em;color:rgba(255,255,255,.45);margin-bottom:2.5rem;max-width:280px;line-height:1.8;}
-#permBtn{font-family:'Bebas Neue',sans-serif;font-size:1.3rem;letter-spacing:.25em;
-  padding:14px 48px;border:1px solid rgba(255,255,255,.25);border-radius:2px;
-  background:rgba(255,255,255,.06);color:#fff;cursor:pointer;}
+#permBanner h2{font-family:'Bebas Neue',sans-serif;font-size:2.2rem;
+  letter-spacing:.15em;color:#fff;margin-bottom:.6rem;}
+#permBanner p{font-family:'Space Mono',monospace;font-size:.7rem;
+  letter-spacing:.1em;color:rgba(255,255,255,.38);margin-bottom:2.5rem;
+  max-width:260px;line-height:2;}
+#permBtn{font-family:'Bebas Neue',sans-serif;font-size:1.25rem;letter-spacing:.25em;
+  padding:13px 46px;border:1px solid rgba(120,80,255,.4);border-radius:1px;
+  background:rgba(120,80,255,.08);color:#fff;cursor:pointer;}
 
-/* HUD */
-#hud{
-  position:fixed;top:0;left:0;right:0;z-index:20;
-  padding:14px 20px;
-  display:flex;justify-content:space-between;align-items:flex-start;
-  pointer-events:none;
-}
-.hv{display:flex;flex-direction:column;gap:1px;}
-.hl{font-family:'Barlow Condensed',sans-serif;font-size:.6rem;letter-spacing:.3em;
-  text-transform:uppercase;color:rgba(255,255,255,.28);}
-.hn{font-family:'Bebas Neue',sans-serif;font-size:1.55rem;letter-spacing:.1em;color:#fff;}
-#windHud{align-items:flex-end;}
-
-/* BALANCE */
-#balWrap{
-  position:fixed;bottom:0;left:0;right:0;z-index:20;
-  padding:16px 24px 22px;pointer-events:none;
-  display:flex;flex-direction:column;gap:8px;
-}
-.blabel{font-family:'Barlow Condensed',sans-serif;font-size:.58rem;
-  letter-spacing:.3em;text-transform:uppercase;color:rgba(255,255,255,.28);text-align:center;}
-.btrack{position:relative;height:3px;background:rgba(255,255,255,.1);border-radius:2px;overflow:visible;}
-.bcenter{position:absolute;top:-4px;left:50%;width:1px;height:11px;
-  background:rgba(255,255,255,.35);transform:translateX(-50%);}
-.bcursor{position:absolute;top:-7px;width:3px;height:17px;
-  background:#fff;border-radius:1px;transform:translateX(-50%);
-  transition:left .04s linear;box-shadow:0 0 10px rgba(255,255,255,.9);}
-
-/* COUNTDOWN */
-#countdown{
-  position:fixed;inset:0;z-index:30;
-  display:flex;flex-direction:column;align-items:center;justify-content:center;
-  pointer-events:none;
-}
-#cdNum{
-  font-family:'Bebas Neue',sans-serif;
-  font-size:clamp(7rem,30vw,13rem);
-  letter-spacing:.05em;color:#fff;
-  text-shadow:0 0 100px rgba(255,200,60,.6);
-  line-height:1;
-  animation:cdPop .4s ease-out;
-  opacity:0;
-}
-#cdMsg{
-  font-family:'Barlow Condensed',sans-serif;font-weight:300;
-  font-size:clamp(.8rem,3.5vw,1.1rem);letter-spacing:.45em;
-  text-transform:uppercase;color:rgba(255,255,255,.45);
-  margin-top:.5rem;opacity:0;
-}
-@keyframes cdPop{0%{transform:scale(1.4);opacity:.8}100%{transform:scale(1);opacity:1}}
-
-/* HOLD GRIP overlay */
-#holdBar{
-  position:fixed;bottom:80px;left:50%;transform:translateX(-50%);
-  z-index:31;width:min(300px,72vw);
-  display:flex;flex-direction:column;align-items:center;gap:6px;
-  pointer-events:none;opacity:0;transition:opacity .3s;
-}
-#holdBar.show{opacity:1;}
-#holdBar p{font-family:'Barlow Condensed',sans-serif;font-weight:300;
-  font-size:.7rem;letter-spacing:.4em;text-transform:uppercase;color:rgba(255,255,255,.4);}
-#holdTrack{width:100%;height:3px;background:rgba(255,255,255,.12);border-radius:2px;position:relative;}
-#holdFill{height:100%;width:0%;background:rgba(255,190,60,.8);border-radius:2px;transition:width .1s linear;}
-
-/* CALIBRATION */
+/* calibration */
 #calibScreen{
   position:fixed;inset:0;z-index:150;background:#000;
   display:none;flex-direction:column;align-items:center;justify-content:center;
   text-align:center;padding:2rem;
 }
 #calibScreen.show{display:flex;}
-#calibScreen h2{font-family:'Bebas Neue',sans-serif;font-size:2.4rem;letter-spacing:.15em;
-  color:#fff;margin-bottom:.5rem;}
-#calibScreen p{font-family:'Barlow Condensed',sans-serif;font-weight:300;font-size:.95rem;
-  letter-spacing:.15em;color:rgba(255,255,255,.45);margin-bottom:2.5rem;
-  max-width:260px;line-height:1.9;}
-#calibRing{
-  width:90px;height:90px;border-radius:50%;
-  border:2px solid rgba(255,255,255,.15);
-  position:relative;margin-bottom:2rem;
-}
-#calibDot{
-  width:14px;height:14px;border-radius:50%;background:#ef4444;
+#calibScreen h2{font-family:'Bebas Neue',sans-serif;font-size:2rem;
+  letter-spacing:.15em;color:#fff;margin-bottom:.5rem;}
+#calibScreen p{font-family:'Space Mono',monospace;font-size:.65rem;
+  letter-spacing:.1em;color:rgba(255,255,255,.38);margin-bottom:2.2rem;
+  max-width:250px;line-height:2;}
+#calibRing{width:80px;height:80px;border-radius:50%;
+  border:1px solid rgba(120,80,255,.35);position:relative;margin-bottom:1.8rem;}
+#calibDot{width:12px;height:12px;border-radius:50%;background:#7850ff;
   position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);
-  transition:top .08s,left .08s;
-  box-shadow:0 0 12px rgba(239,68,68,.8);
-}
-#calibStatus{
-  font-family:'Barlow Condensed',sans-serif;font-weight:300;font-size:.7rem;
-  letter-spacing:.35em;text-transform:uppercase;color:rgba(255,255,255,.35);
-  margin-bottom:2rem;
-}
-#calibBar{width:min(260px,65vw);height:3px;background:rgba(255,255,255,.1);border-radius:2px;}
-#calibBarFill{height:100%;width:0%;border-radius:2px;background:rgba(255,190,60,.8);transition:width .12s;}
+  transition:top .07s,left .07s;box-shadow:0 0 10px rgba(120,80,255,.9);}
+#calibStatus{font-family:'Space Mono',monospace;font-size:.6rem;
+  letter-spacing:.25em;color:rgba(255,255,255,.3);margin-bottom:1.5rem;}
+#calibBar{width:min(240px,60vw);height:2px;background:rgba(255,255,255,.08);border-radius:2px;}
+#calibFill{height:100%;width:0%;border-radius:2px;background:rgba(120,80,255,.8);transition:width .1s;}
 
-/* GAME OVER */
+/* HUD */
+#hud{
+  position:fixed;top:0;left:0;right:0;z-index:20;pointer-events:none;
+  padding:14px 20px;display:flex;justify-content:space-between;align-items:flex-start;
+}
+.hcol{display:flex;flex-direction:column;gap:2px;}
+.hlbl{font-family:'Space Mono',monospace;font-size:.52rem;letter-spacing:.2em;
+  text-transform:uppercase;color:rgba(255,255,255,.22);}
+.hval{font-family:'Bebas Neue',sans-serif;font-size:1.5rem;
+  letter-spacing:.1em;color:#fff;}
+#distBar{
+  position:fixed;bottom:0;left:0;right:0;z-index:20;pointer-events:none;
+  padding:14px 28px 20px;display:flex;flex-direction:column;gap:6px;
+}
+.dlbl{font-family:'Space Mono',monospace;font-size:.52rem;letter-spacing:.25em;
+  text-transform:uppercase;color:rgba(255,255,255,.22);text-align:center;}
+.dtrack{position:relative;height:2px;background:rgba(255,255,255,.08);border-radius:2px;}
+.dcenter{position:absolute;top:-4px;left:50%;width:1px;height:10px;
+  background:rgba(255,255,255,.25);transform:translateX(-50%);}
+.dcursor{position:absolute;top:-6px;width:3px;height:14px;
+  background:#7850ff;border-radius:1px;transform:translateX(-50%);
+  box-shadow:0 0 8px rgba(120,80,255,.9);}
+
+/* overlay */
 #overlay{
-  position:fixed;inset:0;z-index:50;
-  background:rgba(0,0,0,.88);
+  position:fixed;inset:0;z-index:50;background:rgba(0,0,0,.9);
   display:none;flex-direction:column;align-items:center;justify-content:center;
-  backdrop-filter:blur(8px);
+  backdrop-filter:blur(10px);
 }
 #overlay.show{display:flex;}
-.obig{font-family:'Bebas Neue',sans-serif;font-size:clamp(3.5rem,16vw,6rem);
-  letter-spacing:.1em;color:#fff;text-shadow:0 0 80px rgba(239,68,68,.55);margin-bottom:.2em;}
-.osub{font-family:'Barlow Condensed',sans-serif;font-weight:300;
-  font-size:clamp(.85rem,3.5vw,1.05rem);letter-spacing:.35em;
-  text-transform:uppercase;color:rgba(255,255,255,.4);margin-bottom:2rem;}
-.oscr{font-family:'Bebas Neue',sans-serif;font-size:clamp(1.4rem,5vw,2rem);
-  letter-spacing:.15em;color:rgba(255,190,60,.9);margin-bottom:2.5rem;}
-#retryBtn{font-family:'Bebas Neue',sans-serif;font-size:1.3rem;letter-spacing:.25em;
-  padding:14px 48px;border:1px solid rgba(255,255,255,.25);border-radius:2px;
-  background:rgba(255,255,255,.07);color:#fff;cursor:pointer;}
+.obig{font-family:'Bebas Neue',sans-serif;
+  font-size:clamp(3rem,14vw,5.5rem);letter-spacing:.1em;color:#fff;
+  text-shadow:0 0 80px rgba(120,80,255,.6);margin-bottom:.2em;}
+.osub{font-family:'Space Mono',monospace;font-size:clamp(.6rem,2.5vw,.8rem);
+  letter-spacing:.2em;color:rgba(255,255,255,.38);margin-bottom:1.8rem;}
+.oscr{font-family:'Bebas Neue',sans-serif;font-size:clamp(1.3rem,5vw,1.9rem);
+  letter-spacing:.15em;color:rgba(120,80,255,.9);margin-bottom:2.5rem;}
+#retryBtn{font-family:'Bebas Neue',sans-serif;font-size:1.25rem;letter-spacing:.25em;
+  padding:13px 46px;border:1px solid rgba(120,80,255,.4);border-radius:1px;
+  background:rgba(120,80,255,.08);color:#fff;cursor:pointer;}
 </style>
 </head>
 <body>
 
-<!-- SPLASH -->
 <div id="splash">
-  <h1>THE SPIRE</h1>
-  <div class="sub">Burj Khalifa · Dubai</div>
-  <div class="stat">828 METRES ABOVE THE STREET</div>
-  <button id="startBtn">STEP TO THE EDGE</button>
+  <h1>EVENT<br>HORIZON</h1>
+  <div class="sub">tilt to resist · survive the singularity</div>
+  <button id="startBtn">ENTER THE VOID</button>
 </div>
 
-<!-- PERM -->
 <div id="permBanner">
   <h2>MOTION ACCESS</h2>
-  <p>This game uses your gyroscope to keep you balanced on the spire.</p>
-  <button id="permBtn">ALLOW MOTION</button>
+  <p>Gyroscope required<br>to resist the pull.</p>
+  <button id="permBtn">ALLOW</button>
 </div>
 
-<!-- CALIBRATION -->
 <div id="calibScreen">
-  <h2>FIND YOUR BALANCE</h2>
-  <p>Hold your phone in the position you'll play in.<br>Keep it steady.</p>
+  <h2>CALIBRATE</h2>
+  <p>Hold your phone how you'll play.<br>Keep it still.</p>
   <div id="calibRing"><div id="calibDot"></div></div>
-  <div id="calibStatus">READING YOUR ANGLE…</div>
-  <div id="calibBar"><div id="calibBarFill"></div></div>
+  <div id="calibStatus">READING…</div>
+  <div id="calibBar"><div id="calibFill"></div></div>
 </div>
 
-<!-- HUD -->
-<div id="hud">
-  <div class="hv"><span class="hl">Altitude</span><span class="hn">828m</span></div>
-  <div class="hv" style="align-items:center"><span class="hl">Survived</span><span class="hn" id="timeHud">0s</span></div>
-  <div class="hv" id="windHud"><span class="hl">Wind</span><span class="hn" id="windHudVal">—</span></div>
-</div>
-
-<!-- CANVAS -->
 <canvas id="c"></canvas>
 
-<!-- COUNTDOWN -->
-<div id="countdown">
-  <div id="cdNum"></div>
-  <div id="cdMsg"></div>
+<div id="hud">
+  <div class="hcol"><span class="hlbl">Survived</span><span class="hval" id="timeHud">0s</span></div>
+  <div class="hcol" style="align-items:flex-end"><span class="hlbl">Distance</span><span class="hval" id="distHud">—</span></div>
 </div>
 
-<!-- HOLD BAR -->
-<div id="holdBar">
-  <p>GRIP THE SPIRE — HOLD STILL</p>
-  <div id="holdTrack"><div id="holdFill"></div></div>
+<div id="distBar">
+  <div class="dlbl">DISTANCE FROM SINGULARITY</div>
+  <div class="dtrack"><div class="dcenter"></div><div class="dcursor" id="distCursor" style="left:50%"></div></div>
 </div>
 
-<!-- BALANCE -->
-<div id="balWrap">
-  <div class="blabel">BALANCE</div>
-  <div class="btrack"><div class="bcenter"></div><div class="bcursor" id="bcX" style="left:50%"></div></div>
-  <div class="btrack" style="margin-top:4px"><div class="bcenter"></div><div class="bcursor" id="bcY" style="left:50%"></div></div>
-</div>
-
-<!-- GAME OVER -->
 <div id="overlay">
-  <div class="obig">YOU FELL</div>
-  <div class="osub" id="oSub">828 metres · straight down</div>
+  <div class="obig">CONSUMED</div>
+  <div class="osub" id="oSub">the singularity claimed you</div>
   <div class="oscr" id="oScr"></div>
   <button id="retryBtn">TRY AGAIN</button>
 </div>
 
 <script>
-// ─────────────────────────────────────────────────────────────
+// ═══════════════════════════════════════════════════
 //  CANVAS
-// ─────────────────────────────────────────────────────────────
+// ═══════════════════════════════════════════════════
 const cv  = document.getElementById('c');
 const ctx = cv.getContext('2d');
-let W, H;
-function resize(){ W = cv.width = window.innerWidth; H = cv.height = window.innerHeight; }
+let W, H, CX, CY;
+function resize(){
+  W = cv.width  = window.innerWidth;
+  H = cv.height = window.innerHeight;
+  CX = W/2; CY = H/2;
+}
 resize();
-window.addEventListener('resize', () => { resize(); buildCity(); });
+window.addEventListener('resize', resize);
 
-// ─────────────────────────────────────────────────────────────
+// ═══════════════════════════════════════════════════
 //  SEEDED RNG
-// ─────────────────────────────────────────────────────────────
-let _s = 9317;
-function rng(){ _s=(_s*1664525+1013904223)>>>0; return _s/4294967295; }
-function rngR(a,b){ return a+rng()*(b-a); }
+// ═══════════════════════════════════════════════════
+let _s=12345;
+const rng=()=>{ _s=(_s*1664525+1013904223)>>>0; return _s/4294967295; };
 
-// ─────────────────────────────────────────────────────────────
-//  CITY GEOMETRY  — true nadir (straight-down) view
-//  Everything is in world pixels where 1 world unit ≈ 1 metre.
-//  The view frustum covers roughly 2km × 2km of city.
-//  We scale so the world fits the screen.
-// ─────────────────────────────────────────────────────────────
-const WORLD  = 2200;   // metres across the view
-let   SCALE;           // world→screen pixels
-let   OX, OY;          // screen centre
-
-// City grid
-const BLOCK_W = 120, BLOCK_H = 90, ROAD_W = 22;
-const GRID_COLS = Math.floor(WORLD/(BLOCK_W+ROAD_W));
-const GRID_ROWS = Math.floor(WORLD/(BLOCK_H+ROAD_W));
-
-// Pre-built geometry (rebuilt on resize)
-let cityBlocks  = [];   // {x,y,w,h,col,rooftopCol,roofType,hasPool,hasTank}
-let cityRoads   = [];   // {x,y,w,h}  — road rectangles
-let cityParking = [];   // {x,y,w,h,angle}
-let cityPools   = [];   // {cx,cy,r,col}
-let cityCars    = [];   // {x,y,len,wid,angle,col,spd,lane}
-let cityTrees   = [];   // {x,y,r}
-
-function buildCity(){
-  _s = 9317; // reset seed for consistent city
-  SCALE = Math.min(W,H) / WORLD;
-  OX = W/2; OY = H/2;
-
-  cityBlocks  = [];
-  cityRoads   = [];
-  cityParking = [];
-  cityPools   = [];
-  cityCars    = [];
-  cityTrees   = [];
-
-  const hw = WORLD/2;
-
-  // ── Road grid ──
-  // Horizontal roads
-  for(let r=0; r<=GRID_ROWS; r++){
-    const wy = -hw + r*(BLOCK_H+ROAD_W);
-    cityRoads.push({x:-hw, y:wy, w:WORLD, h:ROAD_W, horiz:true});
-  }
-  // Vertical roads
-  for(let c=0; c<=GRID_COLS; c++){
-    const wx = -hw + c*(BLOCK_W+ROAD_W);
-    cityRoads.push({x:wx, y:-hw, w:ROAD_W, h:WORLD, horiz:false});
-  }
-
-  // ── City blocks & buildings ──
-  for(let r=0; r<GRID_ROWS; r++){
-    for(let c=0; c<GRID_COLS; c++){
-      const bx = -hw + c*(BLOCK_W+ROAD_W) + ROAD_W;
-      const by = -hw + r*(BLOCK_H+ROAD_W) + ROAD_W;
-
-      // Each block: 1–4 buildings with setbacks
-      const nBuildings = rng()<.3 ? 1 : rng()<.5 ? 2 : rng()<.7 ? 3 : 4;
-      if(nBuildings===1){
-        // Single large building
-        const pad = rngR(3,10);
-        const bw = BLOCK_W - pad*2, bd = BLOCK_H - pad*2;
-        const hue = rngR(195,230);
-        const light = rngR(28,46);
-        cityBlocks.push({
-          x:bx+pad, y:by+pad, w:bw, h:bd,
-          col:`hsl(${hue},${rngR(8,20)}%,${light}%)`,
-          roofCol:`hsl(${hue},${rngR(10,22)}%,${light+8}%)`,
-          tall: rng()>.55,
-          hasAC: rng()>.4,
-          hasPool: rng()>.85,
-          hasPad: rng()>.9,
-        });
-        if(rng()>.85){
-          cityPools.push({cx:bx+BLOCK_W/2+rngR(-10,10), cy:by+BLOCK_H/2+rngR(-5,5), rw:rngR(6,12), rh:rngR(4,8)});
-        }
-      } else {
-        // Split block into sub-buildings
-        const subW = BLOCK_W/2 - 3;
-        const subH = BLOCK_H/(nBuildings>2?2:1) - 3;
-        for(let i=0;i<nBuildings;i++){
-          const sx = bx + (i%2)*(subW+4);
-          const sy = by + Math.floor(i/2)*(subH+4);
-          const hue = rngR(200,230);
-          const light = rngR(30,48);
-          cityBlocks.push({
-            x:sx+2, y:sy+2, w:subW-4, h:subH-4,
-            col:`hsl(${hue},${rngR(8,18)}%,${light}%)`,
-            roofCol:`hsl(${hue},${rngR(10,22)}%,${light+6}%)`,
-            tall:rng()>.6, hasAC:rng()>.4, hasPool:false, hasPad:rng()>.95
-          });
-        }
-        // Parking lot in some gaps
-        if(rng()>.65){
-          cityParking.push({x:bx+2, y:by+BLOCK_H*0.6, w:BLOCK_W-4, h:BLOCK_H*0.35, angle:0});
-        }
-      }
-
-      // Street trees along block edges
-      for(let t=0;t<rngR(1,4);t++){
-        cityTrees.push({
-          x: bx+rngR(2,BLOCK_W-2),
-          y: by-rngR(2,8),
-          r: rngR(2,5)
-        });
-        cityTrees.push({
-          x: bx+rngR(2,BLOCK_W-2),
-          y: by+BLOCK_H+rngR(2,8),
-          r: rngR(2,5)
-        });
-      }
-    }
-  }
-
-  // ── Cars on roads ──
-  // Horizontal lanes
-  for(let r=0; r<=GRID_ROWS; r++){
-    const wy = -hw + r*(BLOCK_H+ROAD_W) + ROAD_W/2;
-    const nCars = Math.floor(rngR(4,14));
-    for(let i=0;i<nCars;i++){
-      const lane = rng()>.5 ? 1 : -1;
-      cityCars.push({
-        x: rngR(-hw, hw),
-        y: wy + lane*ROAD_W*0.18,
-        len:rngR(8,15), wid:rngR(4,6),
-        angle: lane>0?0:Math.PI,
-        col: carColour(),
-        spd: rngR(0.4,1.2)*lane,
-        horiz:true, lane,
-        road_y: wy,
-      });
-    }
-  }
-  // Vertical lanes
-  for(let c=0; c<=GRID_COLS; c++){
-    const wx = -hw + c*(BLOCK_W+ROAD_W) + ROAD_W/2;
-    const nCars = Math.floor(rngR(4,14));
-    for(let i=0;i<nCars;i++){
-      const lane = rng()>.5 ? 1 : -1;
-      cityCars.push({
-        x: wx + lane*ROAD_W*0.18,
-        y: rngR(-hw, hw),
-        len:rngR(8,15), wid:rngR(4,6),
-        angle: lane>0?Math.PI/2:-Math.PI/2,
-        col: carColour(),
-        spd: rngR(0.4,1.2)*lane,
-        horiz:false, lane,
-        road_x: wx,
-      });
-    }
-  }
+// ═══════════════════════════════════════════════════
+//  STARS  (generated once, parallax with ball lean)
+// ═══════════════════════════════════════════════════
+const STARS=[];
+for(let i=0;i<320;i++){
+  STARS.push({
+    x: rng()*2-1,   // -1 to 1 normalised
+    y: rng()*2-1,
+    r: rng()<.85 ? rng()*.9+.2 : rng()*2+1,
+    alpha: .15+rng()*.85,
+    twinkle: rng()*.08,
+    phase: rng()*Math.PI*2,
+    layer: rng()<.3 ? .2 : rng()<.6 ? .5 : 1,  // parallax depth
+  });
 }
 
-function carColour(){
-  const cols=['#e8e8e8','#c0c0c0','#1a1a1a','#2a2a2a','#a03020','#204060','#e8d080','#60a060'];
-  return cols[Math.floor(rng()*cols.length)];
-}
+// ═══════════════════════════════════════════════════
+//  PHYSICS STATE
+// ═══════════════════════════════════════════════════
+// Ball position in world coords (-1 to 1 normalised to screen)
+let bx=0, by=0;   // distance from centre (0=centre)
+let bvx=0, bvy=0; // velocity
 
-buildCity();
+// Tilt input (calibrated, smoothed)
+let tiltX=0, tiltY=0;
+let rawGamma=0, rawBeta=0;
+let calGamma=0, calBeta=0;
+let smoothX=0, smoothY=0;
+let gyroOn=false;
 
-// ─────────────────────────────────────────────────────────────
-//  TILT / PHYSICS
-// ─────────────────────────────────────────────────────────────
-let tiltX=0, tiltY=0, gyroOn=false;
+// Physics tuning
+const SMOOTH      = 0.06;   // tilt low-pass filter
+const TILT_RANGE  = 80;     // degrees for full tilt signal
+const BH_PULL     = 0.00025; // black hole gravity toward centre
+const TILT_FORCE  = 0.00045; // counter-force from tilt
+const FRICTION    = 0.992;   // velocity damping per frame
+const DEATH_DIST  = 0.42;    // normalised distance — consumed by black hole
+const SAFE_START  = 0.22;    // starting distance from centre
 
-// Camera pan (world coords) — leans accumulate here
-let panX=0, panY=0, pvX=0, pvY=0;
-
-// During HOLD phase: tilt is constrained, gentle sway only
-// During PLAY phase: full lean physics
-const PHASE_HOLD = 'hold';
-const PHASE_PLAY = 'play';
-const PHASE_DEAD = 'dead';
-let phase = PHASE_HOLD;
-
-// Physics constants
-const GRAVITY_HOLD = 0.006;   // gentle sway while holding
-const GRAVITY_PLAY = 0.018;   // lean compounds when free
-const CORRECT      = 0.022;   // tilt correction strength
-const FRICTION     = 0.968;
-const FALL_DIST    = 520;      // world units off-centre before fall
-
-// Wind
-let windX=0, windY=0, windKph=0, windTimer=0;
-function updateWind(dt){
-  windTimer+=dt;
-  const interval = phase===PHASE_HOLD ? 999 : 2.5+rngR(0,3.5);
-  if(windTimer>interval){
-    windTimer=0;
-    const angle=rng()*Math.PI*2;
-    const str = 0; // WIND DISABLED FOR TESTING
-    windX = Math.cos(angle)*str;
-    windY = Math.sin(angle)*str;
-    windKph = Math.round(str*220);
-    document.getElementById('windHudVal').textContent = windKph+' km/h';
-  }
-}
-
-function physicsStep(dt){
-  const G = phase===PHASE_HOLD ? GRAVITY_HOLD : GRAVITY_PLAY;
-
-  pvX += windX * dt * 60;
-  pvY += windY * dt * 60;
-  pvX += panX  * G * dt * 60;
-  pvY += panY  * G * dt * 60;
-
-  if(phase!==PHASE_DEAD){
-    pvX -= tiltX * CORRECT * dt * 60;
-    pvY -= tiltY * CORRECT * dt * 60;
-  }
-
-  pvX *= Math.pow(FRICTION, dt*60);
-  pvY *= Math.pow(FRICTION, dt*60);
-  panX += pvX;
-  panY += pvY;
-
-  // Clamp during hold
-  if(phase===PHASE_HOLD){
-    panX *= 0.92; panY *= 0.92;
-    pvX  *= 0.92; pvY  *= 0.92;
-  }
-
-  // Balance bar update
-  const bx = Math.max(0,Math.min(100,50+panX/FALL_DIST*48));
-  const by = Math.max(0,Math.min(100,50+panY/FALL_DIST*48));
-  document.getElementById('bcX').style.left = bx+'%';
-  document.getElementById('bcY').style.left = by+'%';
-  const danger = Math.sqrt(panX**2+panY**2)/FALL_DIST;
-  const col = danger<0.35?'#22c55e':danger<0.7?'#f59e0b':'#ef4444';
-  document.getElementById('bcX').style.background=col;
-  document.getElementById('bcY').style.background=col;
-
-  if(phase===PHASE_PLAY && Math.sqrt(panX**2+panY**2)>FALL_DIST) triggerFall();
-}
-
-// ─────────────────────────────────────────────────────────────
-//  WIND STREAKS
-// ─────────────────────────────────────────────────────────────
-const streaks=[];
-function updateStreaks(){
-  if(phase!==PHASE_PLAY) return;
-  if(streaks.length<55 && Math.random()<.4){
-    const a=Math.atan2(windY||.05,windX||.1)+(Math.random()-.5)*.5;
-    streaks.push({
-      x:Math.random()*W, y:Math.random()*H*.7,
-      len:25+Math.random()*70,
-      spd:1.5+Math.random()*3,
-      ang:a, alpha:.04+Math.random()*.1,
-      life:1, decay:.018+Math.random()*.022
-    });
-  }
-  for(const s of streaks){ s.x+=Math.cos(s.ang)*s.spd; s.y+=Math.sin(s.ang)*s.spd; s.life-=s.decay; }
-  streaks.splice(0,streaks.length,...streaks.filter(s=>s.life>0));
-}
-function drawStreaks(){
-  ctx.save();
-  for(const s of streaks){
-    ctx.globalAlpha=s.alpha*s.life;
-    ctx.strokeStyle='#c8ddf0'; ctx.lineWidth=.7;
-    ctx.beginPath();
-    ctx.moveTo(s.x,s.y);
-    ctx.lineTo(s.x-Math.cos(s.ang)*s.len, s.y-Math.sin(s.ang)*s.len);
-    ctx.stroke();
-  }
-  ctx.restore();
-}
-
-// ─────────────────────────────────────────────────────────────
-//  WORLD → SCREEN
-// ─────────────────────────────────────────────────────────────
-// The "camera" sits at (panX, panY) in world space.
-// Everything shifts opposite to the lean — as you lean right,
-// the city slides LEFT (you drift right over the city).
-// We also apply a mild perspective tilt: the horizon lifts
-// slightly on the lean side (the "floor" tilts toward you).
-
-function wx2s(wx){ return OX + (wx - panX) * SCALE; }
-function wy2s(wy){ return OY + (wy - panY) * SCALE; }
-function ws2s(ws){ return ws * SCALE; }
-
-// ─────────────────────────────────────────────────────────────
-//  DRAW SCENE
-// ─────────────────────────────────────────────────────────────
+// ═══════════════════════════════════════════════════
+//  GAME STATE
+// ═══════════════════════════════════════════════════
+const STATE = { IDLE:'idle', PLAY:'play', DEAD:'dead' };
+let state = STATE.IDLE;
+let survived=0, bestTime=0, survivalTimer=null;
+let deathT=0;
 let frame=0;
 
-function drawCity(){
-  // ── Ground / tarmac base ──
-  ctx.fillStyle = '#3a3a38';
-  ctx.fillRect(0,0,W,H);
+// ═══════════════════════════════════════════════════
+//  ACCRETION DISC PARTICLES
+// ═══════════════════════════════════════════════════
+const DISC = [];
+for(let i=0;i<180;i++){
+  const angle = rng()*Math.PI*2;
+  const dist  = .055 + rng()*.14;
+  DISC.push({
+    a: angle,
+    da: (.004+rng()*.006)*(rng()<.5?1:-1),  // orbital speed
+    dist,
+    alpha: .15+rng()*.55,
+    r: .8+rng()*2.2,
+    hue: 20+rng()*50,  // orange/yellow/white
+    sat: 60+rng()*40,
+    light: 55+rng()*45,
+  });
+}
 
-  // ── Road network ──
-  for(const r of cityRoads){
-    const sx=wx2s(r.x), sy=wy2s(r.y), sw=ws2s(r.w), sh=ws2s(r.h);
-    if(sx>W+50||sx+sw<-50||sy>H+50||sy+sh<-50) continue;
-    // Tarmac
-    ctx.fillStyle='#2c2c2a';
-    ctx.fillRect(sx,sy,sw,sh);
-    // Lane markings
-    ctx.strokeStyle='rgba(255,255,230,0.18)';
-    ctx.lineWidth=Math.max(0.5,ws2s(1));
-    ctx.setLineDash([ws2s(12),ws2s(10)]);
-    if(r.horiz){
-      const midY=sy+sh/2;
-      ctx.beginPath(); ctx.moveTo(sx,midY); ctx.lineTo(sx+sw,midY); ctx.stroke();
-      // Kerb lines
-      ctx.setLineDash([]);
-      ctx.strokeStyle='rgba(255,255,200,0.1)';
-      ctx.beginPath(); ctx.moveTo(sx,sy); ctx.lineTo(sx+sw,sy); ctx.stroke();
-      ctx.beginPath(); ctx.moveTo(sx,sy+sh); ctx.lineTo(sx+sw,sy+sh); ctx.stroke();
-    } else {
-      const midX=sx+sw/2;
-      ctx.beginPath(); ctx.moveTo(midX,sy); ctx.lineTo(midX,sy+sh); ctx.stroke();
-      ctx.setLineDash([]);
-      ctx.strokeStyle='rgba(255,255,200,0.1)';
-      ctx.beginPath(); ctx.moveTo(sx,sy); ctx.lineTo(sx,sy+sh); ctx.stroke();
-      ctx.beginPath(); ctx.moveTo(sx+sw,sy); ctx.lineTo(sx+sw,sy+sh); ctx.stroke();
-    }
-    ctx.setLineDash([]);
+// ═══════════════════════════════════════════════════
+//  GRAVITATIONAL LENSING RING PARTICLES
+// ═══════════════════════════════════════════════════
+const LENS=[];
+for(let i=0;i<60;i++){
+  const a=rng()*Math.PI*2;
+  LENS.push({
+    a,
+    da: (.002+rng()*.003)*(rng()<.5?1:-1),
+    dist:.042+rng()*.012,
+    alpha:.08+rng()*.2,
+    r:.4+rng()*1.2,
+  });
+}
 
-    // Zebra crossings at intersections
-    if(r.horiz){
-      for(let c=0;c<=GRID_COLS;c++){
-        const hw=WORLD/2;
-        const ix=wx2s(-hw+c*(BLOCK_W+ROAD_W));
-        ctx.fillStyle='rgba(255,255,230,0.12)';
-        const zw=ws2s(ROAD_W*0.9), zh=ws2s(3);
-        for(let z=0;z<5;z++){
-          ctx.fillRect(ix+ws2s(1), sy+z*zh*2.2, zw, zh);
-        }
-      }
-    }
+// ═══════════════════════════════════════════════════
+//  DRAW UTILITIES
+// ═══════════════════════════════════════════════════
+// Convert normalised (-1..1) world coords to screen pixels
+function w2sx(nx){ return CX + nx * Math.min(W,H) * 0.5; }
+function w2sy(ny){ return CY + ny * Math.min(W,H) * 0.5; }
+function wscale(n){ return n * Math.min(W,H) * 0.5; }
+
+// ═══════════════════════════════════════════════════
+//  DRAW BACKGROUND
+// ═══════════════════════════════════════════════════
+function drawBG(){
+  // Deep space gradient
+  const bg=ctx.createRadialGradient(CX,CY,0,CX,CY,Math.max(W,H)*.75);
+  bg.addColorStop(0,'#04020a');
+  bg.addColorStop(.4,'#020008');
+  bg.addColorStop(1,'#000000');
+  ctx.fillStyle=bg; ctx.fillRect(0,0,W,H);
+
+  // Stars with parallax based on ball position
+  for(const s of STARS){
+    // Parallax: distant stars barely move, close ones shift more
+    const px = w2sx(s.x + bx*s.layer*0.15);
+    const py = w2sy(s.y + by*s.layer*0.15);
+    if(px<-4||px>W+4||py<-4||py>H+4) continue;
+    const tw = s.alpha*(1+s.twinkle*Math.sin(frame*.04+s.phase));
+    ctx.globalAlpha=Math.min(1,tw);
+    ctx.fillStyle='#ffffff';
+    ctx.beginPath(); ctx.arc(px,py,s.r,0,Math.PI*2); ctx.fill();
   }
+  ctx.globalAlpha=1;
 
-  // ── Pavement / sidewalks ──
-  for(const r of cityRoads){
-    const sx=wx2s(r.x), sy=wy2s(r.y), sw=ws2s(r.w), sh=ws2s(r.h);
-    if(sx>W+20||sx+sw<-20||sy>H+20||sy+sh<-20) continue;
-    ctx.fillStyle='rgba(160,155,140,0.22)';
-    if(r.horiz){
-      ctx.fillRect(sx, sy-ws2s(4), sw, ws2s(4));
-      ctx.fillRect(sx, sy+sh,      sw, ws2s(4));
-    } else {
-      ctx.fillRect(sx-ws2s(4), sy, ws2s(4), sh);
-      ctx.fillRect(sx+sw,      sy, ws2s(4), sh);
-    }
+  // Nebula wisps
+  const neb=ctx.createRadialGradient(CX,CY,wscale(.3),CX,CY,wscale(1.1));
+  neb.addColorStop(0,'rgba(40,10,80,.0)');
+  neb.addColorStop(.5,'rgba(20,5,50,.08)');
+  neb.addColorStop(1,'rgba(5,0,20,.18)');
+  ctx.fillStyle=neb; ctx.fillRect(0,0,W,H);
+}
+
+// ═══════════════════════════════════════════════════
+//  DRAW BLACK HOLE
+// ═══════════════════════════════════════════════════
+function drawBlackHole(){
+  const bhR = wscale(.038);   // black hole visual radius
+  const cx=CX, cy=CY;
+
+  // ── Outer glow / gravitational lensing distortion ──
+  const glowR = wscale(.18);
+  const glow=ctx.createRadialGradient(cx,cy,bhR*.5,cx,cy,glowR);
+  glow.addColorStop(0,'rgba(0,0,0,1)');
+  glow.addColorStop(.18,'rgba(5,2,15,.95)');
+  glow.addColorStop(.35,'rgba(15,5,35,.7)');
+  glow.addColorStop(.55,'rgba(30,8,55,.35)');
+  glow.addColorStop(.75,'rgba(20,5,40,.12)');
+  glow.addColorStop(1,'rgba(0,0,0,0)');
+  ctx.fillStyle=glow;
+  ctx.beginPath(); ctx.arc(cx,cy,glowR,0,Math.PI*2); ctx.fill();
+
+  // ── Accretion disc particles ──
+  for(const p of DISC){
+    p.a += p.da;
+    const distPx = wscale(p.dist);
+    const px=cx+Math.cos(p.a)*distPx*1.8;  // elliptical
+    const py=cy+Math.sin(p.a)*distPx*0.55;
+    // fade out particles near the event horizon
+    const fade=Math.max(0,(p.dist-.055)/.14);
+    ctx.globalAlpha=p.alpha*fade;
+    ctx.fillStyle=`hsl(${p.hue},${p.sat}%,${p.light}%)`;
+    ctx.beginPath(); ctx.arc(px,py,p.r,0,Math.PI*2); ctx.fill();
   }
+  ctx.globalAlpha=1;
 
-  // ── Trees (tiny green circles along pavements) ──
-  for(const t of cityTrees){
-    const sx=wx2s(t.x), sy=wy2s(t.y), sr=ws2s(t.r);
-    if(sr<0.8) continue;
-    ctx.fillStyle='#3a6a30';
-    ctx.beginPath(); ctx.arc(sx,sy,sr,0,Math.PI*2); ctx.fill();
-    ctx.fillStyle='rgba(80,140,60,0.5)';
-    ctx.beginPath(); ctx.arc(sx-sr*.2,sy-sr*.2,sr*.6,0,Math.PI*2); ctx.fill();
+  // ── Photon ring ──
+  const ringR=wscale(.048);
+  const ringGrad=ctx.createRadialGradient(cx,cy,ringR*.85,cx,cy,ringR*1.2);
+  ringGrad.addColorStop(0,'rgba(255,160,40,0)');
+  ringGrad.addColorStop(.35,'rgba(255,180,60,.55)');
+  ringGrad.addColorStop(.65,'rgba(255,200,80,.3)');
+  ringGrad.addColorStop(1,'rgba(255,140,20,0)');
+  ctx.strokeStyle='rgba(255,170,50,.5)';
+  ctx.lineWidth=wscale(.007);
+  ctx.beginPath(); ctx.arc(cx,cy,ringR,0,Math.PI*2); ctx.stroke();
+
+  // ── Gravitational lensing arcs ──
+  for(const l of LENS){
+    l.a += l.da;
+    const distPx=wscale(l.dist);
+    const px=cx+Math.cos(l.a)*distPx*1.6;
+    const py=cy+Math.sin(l.a)*distPx*0.48;
+    ctx.globalAlpha=l.alpha*(0.7+0.3*Math.sin(frame*.03+l.a));
+    ctx.fillStyle='rgba(255,220,150,1)';
+    ctx.beginPath(); ctx.arc(px,py,l.r,0,Math.PI*2); ctx.fill();
   }
+  ctx.globalAlpha=1;
 
-  // ── Buildings ──
-  for(const b of cityBlocks){
-    const sx=wx2s(b.x), sy=wy2s(b.y), sw=ws2s(b.w), sh=ws2s(b.h);
-    if(sx>W+10||sx+sw<-10||sy>H+10||sy+sh<-10) continue;
+  // ── Inner shadow — the actual singularity ──
+  const inner=ctx.createRadialGradient(cx,cy,0,cx,cy,bhR*1.4);
+  inner.addColorStop(0,'rgba(0,0,0,1)');
+  inner.addColorStop(.7,'rgba(0,0,0,1)');
+  inner.addColorStop(1,'rgba(0,0,0,0)');
+  ctx.fillStyle=inner;
+  ctx.beginPath(); ctx.arc(cx,cy,bhR*1.4,0,Math.PI*2); ctx.fill();
 
-    // Building footprint
-    ctx.fillStyle=b.col;
-    ctx.fillRect(sx,sy,sw,sh);
+  // Lensing ring glow flicker
+  ctx.globalAlpha=0.3+0.15*Math.sin(frame*.07);
+  const flickerGrad=ctx.createRadialGradient(cx,cy,bhR,cx,cy,bhR*2.5);
+  flickerGrad.addColorStop(0,'rgba(255,140,20,.4)');
+  flickerGrad.addColorStop(1,'rgba(0,0,0,0)');
+  ctx.fillStyle=flickerGrad;
+  ctx.beginPath(); ctx.arc(cx,cy,bhR*2.5,0,Math.PI*2); ctx.fill();
+  ctx.globalAlpha=1;
+}
 
-    // Roof colour / surface
-    ctx.fillStyle=b.roofCol;
-    const roofInset=ws2s(2);
-    if(sw>roofInset*2 && sh>roofInset*2)
-      ctx.fillRect(sx+roofInset, sy+roofInset, sw-roofInset*2, sh-roofInset*2);
+// ═══════════════════════════════════════════════════
+//  DRAW BALL
+// ═══════════════════════════════════════════════════
+function drawBall(){
+  const sx=w2sx(bx), sy=w2sy(by);
+  const br=wscale(.018);
 
-    // Shadow edge (south + east faces)
-    ctx.fillStyle='rgba(0,0,0,0.28)';
-    const sh2=Math.max(1,ws2s(3));
-    ctx.fillRect(sx,      sy+sh-sh2, sw, sh2);  // south edge
-    ctx.fillRect(sx+sw-sh2, sy,      sh2, sh);  // east edge
+  // Gravitational stretch: ball elongates toward black hole
+  const dx=-bx, dy=-by;   // direction toward BH
+  const dist=Math.sqrt(bx*bx+by*by);
+  const stretch= dist>0 ? 1+(.22/Math.max(dist,.05)) : 1;
+  const angle=Math.atan2(dy,dx);
 
-    // Highlight (north + west)
-    ctx.fillStyle='rgba(255,255,255,0.06)';
-    ctx.fillRect(sx, sy, sw, Math.max(1,ws2s(2)));
-    ctx.fillRect(sx, sy, Math.max(1,ws2s(2)), sh);
-
-    // AC units on roof
-    if(b.hasAC && sw>ws2s(20)){
-      ctx.fillStyle='rgba(140,140,140,0.7)';
-      const acs = Math.min(4, Math.floor(sw/ws2s(18)));
-      for(let i=0;i<acs;i++){
-        const ax=sx+sw*.15+i*(sw*.7/acs), ay=sy+sh*.2;
-        const aw=ws2s(8), ah=ws2s(5);
-        ctx.fillRect(ax,ay,aw,ah);
-      }
-    }
-
-    // Helipad
-    if(b.hasPad && sw>ws2s(30)){
-      const hx=sx+sw/2, hy=sy+sh/2, hr=Math.min(sw,sh)*0.28;
-      ctx.strokeStyle='rgba(255,220,60,0.5)';
-      ctx.lineWidth=Math.max(1,ws2s(1.5));
-      ctx.beginPath(); ctx.arc(hx,hy,hr,0,Math.PI*2); ctx.stroke();
-      ctx.fillStyle='rgba(255,220,60,0.35)';
-      ctx.font=`bold ${Math.max(6,ws2s(14))}px sans-serif`;
-      ctx.textAlign='center'; ctx.textBaseline='middle';
-      ctx.fillText('H',hx,hy);
-    }
-  }
-
-  // ── Pools ──
-  for(const p of cityPools){
-    const sx=wx2s(p.cx), sy=wy2s(p.cy);
-    const srw=ws2s(p.rw), srh=ws2s(p.rh);
-    ctx.fillStyle='rgba(40,140,200,0.75)';
-    ctx.beginPath(); ctx.ellipse(sx,sy,srw,srh,0,0,Math.PI*2); ctx.fill();
-    ctx.strokeStyle='rgba(80,180,240,0.5)';
-    ctx.lineWidth=.5; ctx.stroke();
-  }
-
-  // ── Cars ──
-  for(const car of cityCars){
-    const sx=wx2s(car.x), sy=wy2s(car.y);
-    const sl=ws2s(car.len), sw2=ws2s(car.wid);
-    if(sl<1) continue;
+  // Trail
+  if(state===STATE.PLAY){
     ctx.save();
-    ctx.translate(sx,sy); ctx.rotate(car.angle);
-    ctx.fillStyle=car.col;
-    ctx.fillRect(-sl/2,-sw2/2,sl,sw2);
-    // Windscreen glint
-    ctx.fillStyle='rgba(160,200,240,0.45)';
-    ctx.fillRect(-sl/2+sl*.55,-sw2/2+sw2*.15,sl*.3,sw2*.7);
-    // Rear lights
-    ctx.fillStyle='rgba(220,60,60,0.8)';
-    ctx.fillRect(-sl/2, -sw2/2+sw2*.1, sl*.12, sw2*.35);
-    ctx.fillRect(-sl/2, -sw2/2+sw2*.55, sl*.12, sw2*.35);
+    ctx.translate(sx,sy); ctx.rotate(angle);
+    for(let i=1;i<=5;i++){
+      const td=i*.018;
+      ctx.globalAlpha=(.18-i*.028)*Math.min(1,dist*2);
+      ctx.fillStyle=`hsl(${220+dist*80},70%,${60+dist*20}%)`;
+      ctx.beginPath();
+      ctx.ellipse(td*wscale(1),0,br*.8,br*.4,0,0,Math.PI*2);
+      ctx.fill();
+    }
     ctx.restore();
   }
+  ctx.globalAlpha=1;
 
-  // ── Parking lots ──
-  for(const pk of cityParking){
-    const sx=wx2s(pk.x), sy=wy2s(pk.y), sw=ws2s(pk.w), sh=ws2s(pk.h);
-    ctx.fillStyle='rgba(50,50,46,0.7)';
-    ctx.fillRect(sx,sy,sw,sh);
-    ctx.strokeStyle='rgba(255,255,200,0.12)';
-    ctx.lineWidth=.7;
-    const nLines=Math.max(1,Math.floor(ws2s(pk.w)/ws2s(12)));
-    for(let i=1;i<nLines;i++){
-      const lx=sx+i*(sw/nLines);
-      ctx.beginPath(); ctx.moveTo(lx,sy); ctx.lineTo(lx,sy+sh); ctx.stroke();
-    }
-  }
-}
+  // Outer glow
+  const glowR=br*3.5;
+  const ballGlow=ctx.createRadialGradient(sx,sy,0,sx,sy,glowR);
+  const hue=200+dist*120;
+  ballGlow.addColorStop(0,`hsla(${hue},80%,80%,.28)`);
+  ballGlow.addColorStop(1,'rgba(0,0,0,0)');
+  ctx.fillStyle=ballGlow;
+  ctx.beginPath(); ctx.arc(sx,sy,glowR,0,Math.PI*2); ctx.fill();
 
-function drawGround(){
-  // The whole view is the city
-  drawCity();
-}
-
-// Slight perspective warp: apply canvas transform based on lean
-// This tilts the "floor" away from us on the lean side
-function applyLeanTransform(){
-  const lx = panX/FALL_DIST, ly = panY/FALL_DIST;
-  const tiltAngle = Math.sqrt(lx*lx+ly*ly)*0.18; // max ~10°
-  const axis = Math.atan2(ly, lx);
-
+  // Ball body — stretched ellipse
   ctx.save();
-  ctx.translate(W/2, H/2);
-  // Very subtle scale skew to give tilt feeling
-  const sx = 1 + Math.abs(lx)*0.12;
-  const sy = 1 + Math.abs(ly)*0.12;
-  ctx.scale(sx, sy);
-  ctx.translate(-W/2+lx*W*0.04, -H/2+ly*H*0.04);
-}
-
-// ─────────────────────────────────────────────────────────────
-//  PERSON'S FEET / LEGS  (what you see when looking straight down)
-// ─────────────────────────────────────────────────────────────
-function drawFeet(){
-  const cx=W/2, cy=H/2;
-
-  // Tiny spire tip platform right at centre
-  const pr = Math.max(14, Math.min(W,H)*0.025);
-
-  // Cast shadow of platform
-  ctx.fillStyle='rgba(0,0,0,0.22)';
+  ctx.translate(sx,sy); ctx.rotate(angle);
+  const ballGrad=ctx.createRadialGradient(-br*.25,-br*.25,0,0,0,br*stretch);
+  ballGrad.addColorStop(0,'#ffffff');
+  ballGrad.addColorStop(.3,`hsl(${hue},75%,68%)`);
+  ballGrad.addColorStop(1,`hsl(${hue+20},85%,35%)`);
+  ctx.fillStyle=ballGrad;
   ctx.beginPath();
-  ctx.ellipse(cx+pr*.3, cy+pr*.4, pr*1.3, pr*.4, 0, 0, Math.PI*2);
+  ctx.ellipse(0,0,br*stretch,br/Math.sqrt(stretch),0,0,Math.PI*2);
   ctx.fill();
-
-  // Platform — small octagonal metal disc
-  const platGrad = ctx.createRadialGradient(cx-pr*.2,cy-pr*.2,0,cx,cy,pr*1.2);
-  platGrad.addColorStop(0,'#d8dadc');
-  platGrad.addColorStop(.5,'#9ca0a4');
-  platGrad.addColorStop(1,'#5a5e62');
-  ctx.fillStyle=platGrad;
-  ctx.beginPath();
-  for(let i=0;i<8;i++){
-    const a=i/8*Math.PI*2-Math.PI/8;
-    i===0?ctx.moveTo(cx+Math.cos(a)*pr,cy+Math.sin(a)*pr*.38)
-         :ctx.lineTo(cx+Math.cos(a)*pr,cy+Math.sin(a)*pr*.38);
-  }
-  ctx.closePath();
-  ctx.fill();
-
-  // Grip lines
-  ctx.strokeStyle='rgba(255,255,255,.2)'; ctx.lineWidth=.6;
-  for(let i=-2;i<=2;i++){
-    ctx.beginPath();
-    ctx.moveTo(cx+i*(pr/2.4)-pr*.4, cy-pr*.12);
-    ctx.lineTo(cx+i*(pr/2.4)+pr*.4, cy+pr*.12);
-    ctx.stroke();
-  }
-
-  // Feet! — Two boot-shaped silhouettes looking straight down
-  // Left foot
-  ctx.save();
-  ctx.translate(cx - pr*.32, cy+pr*.05);
-  ctx.rotate(-0.12 + panX*.008);
-  drawBoot(pr*.38, 'left');
   ctx.restore();
 
-  // Right foot
-  ctx.save();
-  ctx.translate(cx + pr*.32, cy+pr*.05);
-  ctx.rotate(0.12 + panX*.008);
-  drawBoot(pr*.38, 'right');
-  ctx.restore();
-
-  // Trouser cuffs above boots
-  ctx.fillStyle='rgba(30,35,45,0.9)';
-  ctx.beginPath();
-  ctx.ellipse(cx-pr*.32, cy-pr*.08, pr*.22, pr*.3, -0.12+panX*.008, 0, Math.PI*2);
-  ctx.fill();
-  ctx.beginPath();
-  ctx.ellipse(cx+pr*.32, cy-pr*.08, pr*.22, pr*.3,  0.12+panX*.008, 0, Math.PI*2);
-  ctx.fill();
-}
-
-function drawBoot(sz, side){
-  // Top-down boot: roughly oval with toe bump
-  const dir = side==='left' ? -1 : 1;
-  ctx.fillStyle='#1a1a18';
-  ctx.beginPath();
-  ctx.ellipse(0,0, sz*.5, sz*.85, 0, 0, Math.PI*2);
-  ctx.fill();
-  // Toe cap
-  ctx.fillStyle='#2a2a28';
-  ctx.beginPath();
-  ctx.ellipse(dir*sz*.1, sz*.5, sz*.42, sz*.32, 0.1*dir, 0, Math.PI*2);
-  ctx.fill();
-  // Sole edge highlight
-  ctx.strokeStyle='rgba(90,85,75,0.6)'; ctx.lineWidth=sz*.06;
-  ctx.beginPath();
-  ctx.ellipse(0,0, sz*.52, sz*.87, 0, 0, Math.PI*2);
-  ctx.stroke();
-  // Lace dots
-  ctx.fillStyle='rgba(150,140,120,0.5)';
-  for(let i=0;i<3;i++){
-    ctx.beginPath();
-    ctx.arc(0, -sz*.15+i*sz*.18, sz*.055, 0, Math.PI*2);
-    ctx.fill();
+  // Proximity warning ring
+  if(dist<DEATH_DIST+.08){
+    const danger=(DEATH_DIST+.08-dist)/.08;
+    const pulse=.5+.5*Math.sin(Date.now()*.018);
+    ctx.globalAlpha=danger*pulse*.6;
+    ctx.strokeStyle=`hsl(${hue},90%,65%)`;
+    ctx.lineWidth=wscale(.003);
+    ctx.beginPath(); ctx.arc(sx,sy,br*2.5,0,Math.PI*2); ctx.stroke();
+    ctx.globalAlpha=1;
   }
 }
 
-// ─────────────────────────────────────────────────────────────
-//  HEIGHT FOG  — fades edges for that deep vertigo look
-// ─────────────────────────────────────────────────────────────
-function drawAtmosphere(){
-  // Radial blur vignette
-  const vig=ctx.createRadialGradient(W/2,H/2,Math.min(W,H)*.22,W/2,H/2,Math.min(W,H)*.75);
-  vig.addColorStop(0,'rgba(0,0,0,0)');
-  vig.addColorStop(.7,'rgba(0,0,0,0.15)');
-  vig.addColorStop(1,'rgba(0,0,0,0.72)');
-  ctx.fillStyle=vig; ctx.fillRect(0,0,W,H);
+// ═══════════════════════════════════════════════════
+//  DRAW TIDAL FORCE LINES (show pull direction)
+// ═══════════════════════════════════════════════════
+function drawForceField(){
+  if(state!==STATE.PLAY) return;
+  const sx=w2sx(bx), sy=w2sy(by);
+  const dist=Math.sqrt(bx*bx+by*by);
+  if(dist<.01) return;
 
-  // Height haze: desaturates centre (things far below are hazy)
-  const haze=ctx.createRadialGradient(W/2,H/2,0,W/2,H/2,Math.min(W,H)*.52);
-  haze.addColorStop(0,'rgba(200,210,220,0.10)');
-  haze.addColorStop(.45,'rgba(180,195,210,0.06)');
-  haze.addColorStop(1,'rgba(160,175,195,0)');
-  ctx.fillStyle=haze; ctx.fillRect(0,0,W,H);
+  // Arrow pointing toward black hole
+  const angle=Math.atan2(-by,-bx);
+  const strength=Math.min(1,(DEATH_DIST+.15-dist)/.3);
+  if(strength<=0) return;
+
+  const arrowLen=wscale(.06)*strength;
+  ctx.save();
+  ctx.translate(sx,sy); ctx.rotate(angle);
+  ctx.globalAlpha=strength*.35;
+  ctx.strokeStyle='rgba(255,140,30,.8)';
+  ctx.lineWidth=wscale(.003);
+  ctx.setLineDash([wscale(.008),wscale(.008)]);
+  ctx.beginPath(); ctx.moveTo(wscale(.022),0); ctx.lineTo(wscale(.022)+arrowLen,0); ctx.stroke();
+  ctx.setLineDash([]);
+  ctx.restore();
+  ctx.globalAlpha=1;
 }
 
-// ─────────────────────────────────────────────────────────────
+// ═══════════════════════════════════════════════════
+//  DRAW DEATH
+// ═══════════════════════════════════════════════════
+function drawDeath(){
+  deathT=Math.min(1,deathT+.022);
+  // Pull ball toward centre
+  bx *= (1-deathT*.12);
+  by *= (1-deathT*.12);
+  // Screen flash + warp
+  const flash=ctx.createRadialGradient(CX,CY,0,CX,CY,Math.max(W,H)*.8);
+  flash.addColorStop(0,`rgba(100,40,255,${deathT*.4})`);
+  flash.addColorStop(.4,`rgba(20,0,60,${deathT*.6})`);
+  flash.addColorStop(1,`rgba(0,0,0,${deathT*.9})`);
+  ctx.fillStyle=flash; ctx.fillRect(0,0,W,H);
+}
+
+// ═══════════════════════════════════════════════════
 //  MAIN DRAW
-// ─────────────────────────────────────────────────────────────
+// ═══════════════════════════════════════════════════
 function draw(){
   frame++;
   ctx.clearRect(0,0,W,H);
+  drawBG();
+  drawBlackHole();
+  if(state!==STATE.IDLE){
+    drawForceField();
+    drawBall();
+  }
+  if(state===STATE.DEAD) drawDeath();
 
-  // Apply lean-based canvas transform (subtle tilt of entire scene)
-  applyLeanTransform();
-  drawGround();
-  ctx.restore();
+  // Vignette
+  const vig=ctx.createRadialGradient(CX,CY,Math.min(W,H)*.3,CX,CY,Math.max(W,H)*.7);
+  vig.addColorStop(0,'rgba(0,0,0,0)');
+  vig.addColorStop(1,'rgba(0,0,0,0.55)');
+  ctx.fillStyle=vig; ctx.fillRect(0,0,W,H);
+}
 
-  drawStreaks();
-  drawAtmosphere();
-  drawFeet();
+// ═══════════════════════════════════════════════════
+//  PHYSICS
+// ═══════════════════════════════════════════════════
+function physicsStep(){
+  if(state!==STATE.PLAY) return;
 
-  // Fear pulse
-  const danger=Math.sqrt(panX**2+panY**2)/FALL_DIST;
-  if(danger>0.5 && phase===PHASE_PLAY){
-    const pulse=0.5+0.5*Math.sin(Date.now()*.016);
-    ctx.fillStyle=`rgba(239,68,68,${(danger-.5)*0.65*pulse})`;
-    ctx.fillRect(0,0,W,H);
+  // Black hole pulls ball toward centre (0,0)
+  const dist=Math.sqrt(bx*bx+by*by);
+  if(dist>0.001){
+    // Pull force scales with proximity (stronger near BH)
+    const pull=BH_PULL*(1+.5/(dist+.1));
+    bvx -= (bx/dist)*pull;
+    bvy -= (by/dist)*pull;
   }
 
-  // Fall zoom
-  if(phase===PHASE_DEAD){
-    fallT = Math.min(1,(fallT||0)+0.025);
-    const zoom=1+fallT*0.4;
-    ctx.save();
-    ctx.translate(W/2,H/2); ctx.scale(zoom,zoom); ctx.translate(-W/2,-H/2);
-    ctx.fillStyle=`rgba(0,0,0,${fallT*.9})`;
-    ctx.fillRect(0,0,W,H);
-    ctx.restore();
+  // Tilt pushes ball away from centre in tilt direction
+  bvx += tiltX * TILT_FORCE;
+  bvy += tiltY * TILT_FORCE;
+
+  // Friction
+  bvx *= FRICTION;
+  bvy *= FRICTION;
+
+  bx += bvx;
+  by += bvy;
+
+  // Update HUD
+  const distPct = Math.max(0, Math.min(100, (1 - dist/DEATH_DIST)*50 + 50));
+  document.getElementById('distCursor').style.left = Math.max(2,Math.min(98,distPct))+'%';
+  const col = dist>DEATH_DIST*.6 ? '#7850ff' : dist>DEATH_DIST*.85 ? '#f59e0b' : '#ef4444';
+  document.getElementById('distCursor').style.background=col;
+  document.getElementById('distCursor').style.boxShadow=`0 0 8px ${col}`;
+  document.getElementById('distHud').textContent = Math.round(dist*1000)+'m';
+
+  // Death check
+  if(dist < DEATH_DIST * .07){
+    triggerDeath();
   }
 }
 
-let fallT=0;
-
-// ─────────────────────────────────────────────────────────────
-//  CAR MOVEMENT
-// ─────────────────────────────────────────────────────────────
-function moveCars(dt){
-  const hw=WORLD/2;
-  for(const car of cityCars){
-    if(car.horiz){
-      car.x += car.spd * dt * 30;
-      if(car.x>hw+20)  car.x=-hw-20;
-      if(car.x<-hw-20) car.x=hw+20;
-    } else {
-      car.y += car.spd * dt * 30;
-      if(car.y>hw+20)  car.y=-hw-20;
-      if(car.y<-hw-20) car.y=hw+20;
-    }
-  }
+// ═══════════════════════════════════════════════════
+//  MAIN LOOP
+// ═══════════════════════════════════════════════════
+let lastTs=0, animId=null;
+function loop(ts){
+  const dt=Math.min(.05,(ts-lastTs)/1000||.016);
+  lastTs=ts;
+  applyKeyboard();
+  physicsStep();
+  draw();
+  animId=requestAnimationFrame(loop);
 }
 
-// ─────────────────────────────────────────────────────────────
-//  GAME STATES
-// ─────────────────────────────────────────────────────────────
-let survived=0, bestTime=0, survivalTimer=null;
-
-// 5-second countdown + hold phase
-let cdStep=0, cdActive=false;
-const cdNums=[5,4,3,2,1];
-
-function startCountdown(){
-  cdStep=0; cdActive=true;
-  phase=PHASE_HOLD;
-  document.getElementById('holdBar').classList.add('show');
-  showCountdownNum();
-}
-
-function showCountdownNum(){
-  const el=document.getElementById('cdNum');
-  const msg=document.getElementById('cdMsg');
-
-  if(cdStep===0){
-    msg.style.opacity=1;
-    msg.textContent='HOLD ON TIGHT';
-  }
-
-  if(cdStep < cdNums.length){
-    el.textContent=cdNums[cdStep];
-    el.style.animation='none';
-    requestAnimationFrame(()=>{
-      requestAnimationFrame(()=>{
-        el.style.animation='cdPop .35s ease-out forwards';
-        el.style.opacity=1;
-      });
-    });
-    // fill hold bar
-    const pct=((cdStep+1)/cdNums.length)*100;
-    document.getElementById('holdFill').style.width=pct+'%';
-
-    cdStep++;
-    setTimeout(showCountdownNum, 1000);
-  } else {
-    // release!
-    el.textContent='GO';
-    el.style.animation='cdPop .3s ease-out forwards';
-    msg.textContent='YOU\'RE ON YOUR OWN';
-    msg.style.color='rgba(255,100,80,.7)';
-    document.getElementById('windHudVal').textContent='—';
-    setTimeout(()=>{
-      el.style.opacity=0; msg.style.opacity=0;
-      document.getElementById('holdBar').classList.remove('show');
-      releasePlayer();
-    },900);
-  }
-}
-
-function releasePlayer(){
-  phase=PHASE_PLAY;
-  cdActive=false;
+// ═══════════════════════════════════════════════════
+//  GAME FLOW
+// ═══════════════════════════════════════════════════
+function startGame(){
+  // Place ball at a safe orbit distance
+  const angle=Math.random()*Math.PI*2;
+  bx=Math.cos(angle)*SAFE_START;
+  by=Math.sin(angle)*SAFE_START;
+  // Give it a small tangential velocity so it naturally wants to orbit
+  const tangAngle=angle+Math.PI/2;
+  bvx=Math.cos(tangAngle)*.0018;
+  bvy=Math.sin(tangAngle)*.0018;
+  state=STATE.PLAY;
   survived=0;
+  deathT=0;
   clearInterval(survivalTimer);
   survivalTimer=setInterval(()=>{
-    if(phase!==PHASE_PLAY) return;
+    if(state!==STATE.PLAY) return;
     survived++;
     document.getElementById('timeHud').textContent=survived+'s';
-    // wind escalates
-    if(survived>40) windTimer=99;
   },1000);
 }
 
-function triggerFall(){
-  if(phase===PHASE_DEAD) return;
-  phase=PHASE_DEAD;
+function triggerDeath(){
+  if(state===STATE.DEAD) return;
+  state=STATE.DEAD;
   clearInterval(survivalTimer);
   if(survived>bestTime) bestTime=survived;
-  fallT=0;
-  setTimeout(showGameOver, 1400);
+  setTimeout(showGameOver,1600);
 }
 
 function showGameOver(){
@@ -972,217 +590,101 @@ function showGameOver(){
   document.getElementById('overlay').classList.add('show');
 }
 
-function restart(){
+document.getElementById('retryBtn').addEventListener('click',()=>{
   document.getElementById('overlay').classList.remove('show');
-  panX=0; panY=0; pvX=0; pvY=0;
-  tiltX=0; tiltY=0; smoothX=0; smoothY=0;
-  windX=0; windY=0; windKph=0; windTimer=0; fallT=0;
+  smoothX=0; smoothY=0; tiltX=0; tiltY=0;
   document.getElementById('timeHud').textContent='0s';
-  document.getElementById('windHudVal').textContent='—';
-  document.getElementById('cdMsg').style.color='rgba(255,255,255,.45)';
-  document.getElementById('holdFill').style.width='0%';
-  // Re-calibrate each round so posture changes are handled
+  document.getElementById('distHud').textContent='—';
   startCalibration();
-}
+});
 
-document.getElementById('retryBtn').addEventListener('click', restart);
-
-// ─────────────────────────────────────────────────────────────
-//  MAIN LOOP
-// ─────────────────────────────────────────────────────────────
-let lastTs=0, animId=null;
-function loop(ts){
-  const dt=Math.min(.05,(ts-lastTs)/1000||.016);
-  lastTs=ts;
-  applyKeyboard();
-  updateWind(dt);
-  updateStreaks();
-  moveCars(dt);
-  physicsStep(dt);
-  draw();
-  animId=requestAnimationFrame(loop);
-}
-
-// ─────────────────────────────────────────────────────────────
-//  INPUT — gyro with calibration offset + smoothing
-// ─────────────────────────────────────────────────────────────
-
-// Raw gyro values
-let rawGamma=0, rawBeta=0;
-
-// Calibration offset — set to the user's natural hold angle
-let calGamma=0, calBeta=0;
-let calibrated=false;
-
-// Smoothed tilt (low-pass filter so tiny jitter doesn't matter)
-let smoothX=0, smoothY=0;
-const SMOOTH = 0.04;   // lower = more smoothing (0.05 very sluggish, 0.25 responsive)
-
-// Sensitivity: degrees of tilt = full correction signal
-// Higher = less sensitive (needs bigger tilt to correct)
-const TILT_RANGE = 90;  // degrees either side for full signal
-
+// ═══════════════════════════════════════════════════
+//  GYRO + CALIBRATION
+// ═══════════════════════════════════════════════════
 function attachGyro(){
-  window.addEventListener('deviceorientation', e => {
-    rawGamma = e.gamma || 0;
-    rawBeta  = e.beta  || 0;
-
-    // Apply calibration offset
-    const relX = rawGamma - calGamma;
-    const relY = rawBeta  - calBeta;
-
-    // Normalise to -1…1 over TILT_RANGE degrees
-    const nx = Math.max(-1, Math.min(1, relX / TILT_RANGE));
-    const ny = Math.max(-1, Math.min(1, relY / TILT_RANGE));
-
-    // Low-pass smooth
-    smoothX += (nx - smoothX) * SMOOTH;
-    smoothY += (ny - smoothY) * SMOOTH;
-
-    tiltX = smoothX;
-    tiltY = smoothY;
-  }, true);
-  gyroOn = true;
+  window.addEventListener('deviceorientation',e=>{
+    rawGamma=e.gamma||0; rawBeta=e.beta||0;
+    const rx=Math.max(-1,Math.min(1,(rawGamma-calGamma)/TILT_RANGE));
+    const ry=Math.max(-1,Math.min(1,(rawBeta -calBeta )/TILT_RANGE));
+    smoothX+=(rx-smoothX)*SMOOTH;
+    smoothY+=(ry-smoothY)*SMOOTH;
+    tiltX=smoothX; tiltY=smoothY;
+  },true);
+  gyroOn=true;
 }
 
-// ─────────────────────────────────────────────────────────────
-//  CALIBRATION  — sample natural hold angle over 2 seconds
-// ─────────────────────────────────────────────────────────────
-const CALIB_DURATION = 2200;  // ms to sample
-let calibSamples = [];
-let calibTimer   = null;
-let calibInterval= null;
+let calibSamples=[], calibInterval2=null, calibTimer2=null;
+const CALIB_MS=2000;
 
 function startCalibration(){
   document.getElementById('calibScreen').classList.add('show');
-  calibSamples = [];
-  document.getElementById('calibBarFill').style.width = '0%';
-  document.getElementById('calibStatus').textContent  = 'HOLD STILL — READING YOUR ANGLE…';
-  document.getElementById('calibDot').style.background = '#ef4444';
-  document.getElementById('calibDot').style.boxShadow  = '0 0 12px rgba(239,68,68,.8)';
-
-  const start = Date.now();
-
-  calibInterval = setInterval(() => {
-    calibSamples.push({ g: rawGamma, b: rawBeta });
-
-    // Move dot to show current tilt (relative to ±30°)
-    const dx = Math.max(-1,Math.min(1, rawGamma/30));
-    const dy = Math.max(-1,Math.min(1,(rawBeta-15)/30));
-    const ring = document.getElementById('calibRing');
-    const r = ring.offsetWidth/2 - 9;
-    document.getElementById('calibDot').style.left = (50 + dx*r/ring.offsetWidth*100)+'%';
-    document.getElementById('calibDot').style.top  = (50 + dy*r/ring.offsetHeight*100)+'%';
-
-    const pct = Math.min(100, (Date.now()-start)/CALIB_DURATION*100);
-    document.getElementById('calibBarFill').style.width = pct+'%';
-  }, 60);
-
-  calibTimer = setTimeout(() => {
-    clearInterval(calibInterval);
-    finishCalibration();
-  }, CALIB_DURATION);
+  calibSamples=[];
+  document.getElementById('calibFill').style.width='0%';
+  document.getElementById('calibStatus').textContent='READING YOUR ANGLE…';
+  document.getElementById('calibDot').style.background='#7850ff';
+  document.getElementById('calibDot').style.boxShadow='0 0 10px rgba(120,80,255,.9)';
+  const start=Date.now();
+  clearInterval(calibInterval2); clearTimeout(calibTimer2);
+  calibInterval2=setInterval(()=>{
+    calibSamples.push({g:rawGamma,b:rawBeta});
+    const dx=Math.max(-1,Math.min(1,rawGamma/30));
+    const dy=Math.max(-1,Math.min(1,(rawBeta-15)/30));
+    const ring=document.getElementById('calibRing');
+    const r=ring.offsetWidth/2-8;
+    document.getElementById('calibDot').style.left=(50+dx*r/(ring.offsetWidth/2)*100)+'%';
+    document.getElementById('calibDot').style.top =(50+dy*r/(ring.offsetHeight/2)*100)+'%';
+    document.getElementById('calibFill').style.width=Math.min(100,(Date.now()-start)/CALIB_MS*100)+'%';
+  },60);
+  calibTimer2=setTimeout(finishCalibration, CALIB_MS);
 }
 
 function finishCalibration(){
-  if(calibSamples.length < 5){ startCalibration(); return; }
-
-  // Average the last half of samples (most stable)
-  const half = calibSamples.slice(Math.floor(calibSamples.length/2));
-  calGamma = half.reduce((a,s)=>a+s.g,0)/half.length;
-  calBeta  = half.reduce((a,s)=>a+s.b,0)/half.length;
-  calibrated = true;
-
-  document.getElementById('calibStatus').textContent  = 'CALIBRATED  ✓';
-  document.getElementById('calibDot').style.background = '#22c55e';
-  document.getElementById('calibDot').style.boxShadow  = '0 0 14px rgba(34,197,94,.9)';
-  document.getElementById('calibDot').style.top  = '50%';
-  document.getElementById('calibDot').style.left = '50%';
-
-  setTimeout(() => {
+  clearInterval(calibInterval2);
+  if(calibSamples.length<5){startCalibration();return;}
+  const half=calibSamples.slice(Math.floor(calibSamples.length/2));
+  calGamma=half.reduce((a,s)=>a+s.g,0)/half.length;
+  calBeta =half.reduce((a,s)=>a+s.b,0)/half.length;
+  document.getElementById('calibStatus').textContent='CALIBRATED  ✓';
+  document.getElementById('calibDot').style.background='#22c55e';
+  document.getElementById('calibDot').style.boxShadow='0 0 12px rgba(34,197,94,.9)';
+  document.getElementById('calibDot').style.top='50%';
+  document.getElementById('calibDot').style.left='50%';
+  setTimeout(()=>{
     document.getElementById('calibScreen').classList.remove('show');
-    startCountdown();
-  }, 700);
+    startGame();
+  },600);
 }
 
-// ─────────────────────────────────────────────────────────────
-//  KEYBOARD FALLBACK (desktop)
-// ─────────────────────────────────────────────────────────────
 const keys={};
 window.addEventListener('keydown',e=>keys[e.key]=true);
 window.addEventListener('keyup',  e=>keys[e.key]=false);
 function applyKeyboard(){
   if(gyroOn) return;
-  if     (keys['ArrowLeft'] ||keys['a']) tiltX=Math.max(-1,tiltX-.12);
-  else if(keys['ArrowRight']||keys['d']) tiltX=Math.min( 1,tiltX+.12);
-  else tiltX*=.82;
-  if     (keys['ArrowUp']   ||keys['w']) tiltY=Math.max(-1,tiltY-.12);
-  else if(keys['ArrowDown'] ||keys['s']) tiltY=Math.min( 1,tiltY+.12);
-  else tiltY*=.82;
+  if     (keys['ArrowLeft'] ||keys['a']) tiltX=Math.max(-1,tiltX-.1);
+  else if(keys['ArrowRight']||keys['d']) tiltX=Math.min( 1,tiltX+.1);
+  else tiltX*=.85;
+  if     (keys['ArrowUp']   ||keys['w']) tiltY=Math.max(-1,tiltY-.1);
+  else if(keys['ArrowDown'] ||keys['s']) tiltY=Math.min( 1,tiltY+.1);
+  else tiltY*=.85;
 }
 
-// ─────────────────────────────────────────────────────────────
-//  PHYSICS CONSTANTS — much less sensitive than before
-// ─────────────────────────────────────────────────────────────
-// (override the consts defined earlier)
-const GRAVITY_HOLD_V2 = 0.0002;
-const GRAVITY_PLAY_V2 = 0.0008;
-const CORRECT_V2      = 0.030;
-const FRICTION_V2     = 0.995;
-const FALL_DIST_V2    = 1800;
-
-// Patch physicsStep to use new values
-// We redefine here (shadows the earlier consts via closure)
-const _origPhysics = physicsStep;
-physicsStep = function(dt){
-  const G = phase===PHASE_HOLD ? GRAVITY_HOLD_V2 : GRAVITY_PLAY_V2;
-  pvX += windX * dt * 60;
-  pvY += windY * dt * 60;
-  pvX += panX  * G * dt * 60;
-  pvY += panY  * G * dt * 60;
-  if(phase!==PHASE_DEAD){
-    pvX -= tiltX * CORRECT_V2 * dt * 60;
-    pvY -= tiltY * CORRECT_V2 * dt * 60;
-  }
-  pvX *= Math.pow(FRICTION_V2, dt*60);
-  pvY *= Math.pow(FRICTION_V2, dt*60);
-  panX += pvX;
-  panY += pvY;
-  if(phase===PHASE_HOLD){ panX*=.94; panY*=.94; pvX*=.94; pvY*=.94; }
-
-  const bx=Math.max(0,Math.min(100,50+panX/FALL_DIST_V2*48));
-  const by=Math.max(0,Math.min(100,50+panY/FALL_DIST_V2*48));
-  document.getElementById('bcX').style.left=bx+'%';
-  document.getElementById('bcY').style.left=by+'%';
-  const danger=Math.sqrt(panX**2+panY**2)/FALL_DIST_V2;
-  const col=danger<0.35?'#22c55e':danger<0.7?'#f59e0b':'#ef4444';
-  document.getElementById('bcX').style.background=col;
-  document.getElementById('bcY').style.background=col;
-  if(phase===PHASE_PLAY && Math.sqrt(panX**2+panY**2)>FALL_DIST_V2) triggerFall();
-};
-
-// ─────────────────────────────────────────────────────────────
-//  BOOT SEQUENCE
-// ─────────────────────────────────────────────────────────────
+// ═══════════════════════════════════════════════════
+//  BOOT
+// ═══════════════════════════════════════════════════
 function beginGame(){
-  const sp=document.getElementById('splash');
-  sp.style.opacity='0';
-  setTimeout(()=>sp.style.display='none',700);
-  panX=0; panY=0; pvX=0; pvY=0; fallT=0;
+  document.getElementById('splash').style.opacity='0';
+  setTimeout(()=>document.getElementById('splash').style.display='none',700);
   animId=requestAnimationFrame(loop);
-  // Short pause then calibrate
-  setTimeout(startCalibration, 600);
+  setTimeout(startCalibration,600);
 }
 
 function requestGyroPermission(){
   if(typeof DeviceOrientationEvent!=='undefined'&&
      typeof DeviceOrientationEvent.requestPermission==='function'){
     DeviceOrientationEvent.requestPermission()
-      .then(s=>{ if(s==='granted') attachGyro(); beginGame(); })
+      .then(s=>{if(s==='granted')attachGyro(); beginGame();})
       .catch(()=>beginGame());
-  } else {
-    attachGyro(); beginGame();
-  }
+  } else { attachGyro(); beginGame(); }
 }
 
 document.getElementById('startBtn').addEventListener('click',()=>{
@@ -1196,7 +698,6 @@ document.getElementById('permBtn').addEventListener('click',()=>{
   requestGyroPermission();
 });
 
-// Run draw loop even on splash
 animId=requestAnimationFrame(loop);
 </script>
 </body>
