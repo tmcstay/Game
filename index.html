@@ -442,7 +442,7 @@ function updateWind(dt){
   if(windTimer>interval){
     windTimer=0;
     const angle=rng()*Math.PI*2;
-    const str = phase===PHASE_PLAY ? rngR(0.04,0.22) : 0.01;
+    const str = phase===PHASE_PLAY ? rngR(0.015,0.08) : 0.005;
     windX = Math.cos(angle)*str;
     windY = Math.sin(angle)*str;
     windKph = Math.round(str*220);
@@ -954,7 +954,7 @@ function releasePlayer(){
     survived++;
     document.getElementById('timeHud').textContent=survived+'s';
     // wind escalates
-    if(survived>15) windTimer=99;
+    if(survived>40) windTimer=99;
   },1000);
 }
 
@@ -1016,11 +1016,11 @@ let calibrated=false;
 
 // Smoothed tilt (low-pass filter so tiny jitter doesn't matter)
 let smoothX=0, smoothY=0;
-const SMOOTH = 0.12;   // lower = more smoothing (0.05 very sluggish, 0.25 responsive)
+const SMOOTH = 0.07;   // lower = more smoothing (0.05 very sluggish, 0.25 responsive)
 
 // Sensitivity: degrees of tilt = full correction signal
 // Higher = less sensitive (needs bigger tilt to correct)
-const TILT_RANGE = 18;  // degrees either side for full signal
+const TILT_RANGE = 40;  // degrees either side for full signal
 
 function attachGyro(){
   window.addEventListener('deviceorientation', e => {
@@ -1125,11 +1125,11 @@ function applyKeyboard(){
 //  PHYSICS CONSTANTS — much less sensitive than before
 // ─────────────────────────────────────────────────────────────
 // (override the consts defined earlier)
-const GRAVITY_HOLD_V2 = 0.003;
-const GRAVITY_PLAY_V2 = 0.009;   // half what it was
-const CORRECT_V2      = 0.016;   // correction is stronger relative to gravity
-const FRICTION_V2     = 0.974;
-const FALL_DIST_V2    = 620;      // larger safe zone
+const GRAVITY_HOLD_V2 = 0.0008;
+const GRAVITY_PLAY_V2 = 0.003;   // very gentle lean gravity
+const CORRECT_V2      = 0.022;   // correction easily overcomes gravity
+const FRICTION_V2     = 0.988;   // high friction — movement bleeds off quickly
+const FALL_DIST_V2    = 900;     // much larger safe zone before falling
 
 // Patch physicsStep to use new values
 // We redefine here (shadows the earlier consts via closure)
