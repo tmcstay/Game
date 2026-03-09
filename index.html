@@ -121,6 +121,37 @@ canvas{position:fixed;inset:0;width:100%;height:100%;display:block;}
 #holdTrack{width:100%;height:3px;background:rgba(255,255,255,.12);border-radius:2px;position:relative;}
 #holdFill{height:100%;width:0%;background:rgba(255,190,60,.8);border-radius:2px;transition:width .1s linear;}
 
+/* CALIBRATION */
+#calibScreen{
+  position:fixed;inset:0;z-index:150;background:#000;
+  display:none;flex-direction:column;align-items:center;justify-content:center;
+  text-align:center;padding:2rem;
+}
+#calibScreen.show{display:flex;}
+#calibScreen h2{font-family:'Bebas Neue',sans-serif;font-size:2.4rem;letter-spacing:.15em;
+  color:#fff;margin-bottom:.5rem;}
+#calibScreen p{font-family:'Barlow Condensed',sans-serif;font-weight:300;font-size:.95rem;
+  letter-spacing:.15em;color:rgba(255,255,255,.45);margin-bottom:2.5rem;
+  max-width:260px;line-height:1.9;}
+#calibRing{
+  width:90px;height:90px;border-radius:50%;
+  border:2px solid rgba(255,255,255,.15);
+  position:relative;margin-bottom:2rem;
+}
+#calibDot{
+  width:14px;height:14px;border-radius:50%;background:#ef4444;
+  position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);
+  transition:top .08s,left .08s;
+  box-shadow:0 0 12px rgba(239,68,68,.8);
+}
+#calibStatus{
+  font-family:'Barlow Condensed',sans-serif;font-weight:300;font-size:.7rem;
+  letter-spacing:.35em;text-transform:uppercase;color:rgba(255,255,255,.35);
+  margin-bottom:2rem;
+}
+#calibBar{width:min(260px,65vw);height:3px;background:rgba(255,255,255,.1);border-radius:2px;}
+#calibBarFill{height:100%;width:0%;border-radius:2px;background:rgba(255,190,60,.8);transition:width .12s;}
+
 /* GAME OVER */
 #overlay{
   position:fixed;inset:0;z-index:50;
@@ -156,6 +187,15 @@ canvas{position:fixed;inset:0;width:100%;height:100%;display:block;}
   <h2>MOTION ACCESS</h2>
   <p>This game uses your gyroscope to keep you balanced on the spire.</p>
   <button id="permBtn">ALLOW MOTION</button>
+</div>
+
+<!-- CALIBRATION -->
+<div id="calibScreen">
+  <h2>FIND YOUR BALANCE</h2>
+  <p>Hold your phone in the position you'll play in.<br>Keep it steady.</p>
+  <div id="calibRing"><div id="calibDot"></div></div>
+  <div id="calibStatus">READING YOUR ANGLE…</div>
+  <div id="calibBar"><div id="calibBarFill"></div></div>
 </div>
 
 <!-- HUD -->
@@ -935,12 +975,14 @@ function showGameOver(){
 function restart(){
   document.getElementById('overlay').classList.remove('show');
   panX=0; panY=0; pvX=0; pvY=0;
-  tiltX=0; tiltY=0; windX=0; windY=0;
-  windKph=0; windTimer=0; fallT=0;
+  tiltX=0; tiltY=0; smoothX=0; smoothY=0;
+  windX=0; windY=0; windKph=0; windTimer=0; fallT=0;
   document.getElementById('timeHud').textContent='0s';
   document.getElementById('windHudVal').textContent='—';
   document.getElementById('cdMsg').style.color='rgba(255,255,255,.45)';
-  startCountdown();
+  document.getElementById('holdFill').style.width='0%';
+  // Re-calibrate each round so posture changes are handled
+  startCalibration();
 }
 
 document.getElementById('retryBtn').addEventListener('click', restart);
@@ -962,28 +1004,162 @@ function loop(ts){
 }
 
 // ─────────────────────────────────────────────────────────────
-//  INPUT
+//  INPUT — gyro with calibration offset + smoothing
 // ─────────────────────────────────────────────────────────────
+
+// Raw gyro values
+let rawGamma=0, rawBeta=0;
+
+// Calibration offset — set to the user's natural hold angle
+let calGamma=0, calBeta=0;
+let calibrated=false;
+
+// Smoothed tilt (low-pass filter so tiny jitter doesn't matter)
+let smoothX=0, smoothY=0;
+const SMOOTH = 0.12;   // lower = more smoothing (0.05 very sluggish, 0.25 responsive)
+
+// Sensitivity: degrees of tilt = full correction signal
+// Higher = less sensitive (needs bigger tilt to correct)
+const TILT_RANGE = 18;  // degrees either side for full signal
+
 function attachGyro(){
-  window.addEventListener('deviceorientation',e=>{
-    tiltX=Math.max(-1,Math.min(1,(e.gamma||0)/28));
-    tiltY=Math.max(-1,Math.min(1,((e.beta||0)-15)/28));
-  },true);
-  gyroOn=true;
+  window.addEventListener('deviceorientation', e => {
+    rawGamma = e.gamma || 0;
+    rawBeta  = e.beta  || 0;
+
+    // Apply calibration offset
+    const relX = rawGamma - calGamma;
+    const relY = rawBeta  - calBeta;
+
+    // Normalise to -1…1 over TILT_RANGE degrees
+    const nx = Math.max(-1, Math.min(1, relX / TILT_RANGE));
+    const ny = Math.max(-1, Math.min(1, relY / TILT_RANGE));
+
+    // Low-pass smooth
+    smoothX += (nx - smoothX) * SMOOTH;
+    smoothY += (ny - smoothY) * SMOOTH;
+
+    tiltX = smoothX;
+    tiltY = smoothY;
+  }, true);
+  gyroOn = true;
 }
 
+// ─────────────────────────────────────────────────────────────
+//  CALIBRATION  — sample natural hold angle over 2 seconds
+// ─────────────────────────────────────────────────────────────
+const CALIB_DURATION = 2200;  // ms to sample
+let calibSamples = [];
+let calibTimer   = null;
+let calibInterval= null;
+
+function startCalibration(){
+  document.getElementById('calibScreen').classList.add('show');
+  calibSamples = [];
+  document.getElementById('calibBarFill').style.width = '0%';
+  document.getElementById('calibStatus').textContent  = 'HOLD STILL — READING YOUR ANGLE…';
+  document.getElementById('calibDot').style.background = '#ef4444';
+  document.getElementById('calibDot').style.boxShadow  = '0 0 12px rgba(239,68,68,.8)';
+
+  const start = Date.now();
+
+  calibInterval = setInterval(() => {
+    calibSamples.push({ g: rawGamma, b: rawBeta });
+
+    // Move dot to show current tilt (relative to ±30°)
+    const dx = Math.max(-1,Math.min(1, rawGamma/30));
+    const dy = Math.max(-1,Math.min(1,(rawBeta-15)/30));
+    const ring = document.getElementById('calibRing');
+    const r = ring.offsetWidth/2 - 9;
+    document.getElementById('calibDot').style.left = (50 + dx*r/ring.offsetWidth*100)+'%';
+    document.getElementById('calibDot').style.top  = (50 + dy*r/ring.offsetHeight*100)+'%';
+
+    const pct = Math.min(100, (Date.now()-start)/CALIB_DURATION*100);
+    document.getElementById('calibBarFill').style.width = pct+'%';
+  }, 60);
+
+  calibTimer = setTimeout(() => {
+    clearInterval(calibInterval);
+    finishCalibration();
+  }, CALIB_DURATION);
+}
+
+function finishCalibration(){
+  if(calibSamples.length < 5){ startCalibration(); return; }
+
+  // Average the last half of samples (most stable)
+  const half = calibSamples.slice(Math.floor(calibSamples.length/2));
+  calGamma = half.reduce((a,s)=>a+s.g,0)/half.length;
+  calBeta  = half.reduce((a,s)=>a+s.b,0)/half.length;
+  calibrated = true;
+
+  document.getElementById('calibStatus').textContent  = 'CALIBRATED  ✓';
+  document.getElementById('calibDot').style.background = '#22c55e';
+  document.getElementById('calibDot').style.boxShadow  = '0 0 14px rgba(34,197,94,.9)';
+  document.getElementById('calibDot').style.top  = '50%';
+  document.getElementById('calibDot').style.left = '50%';
+
+  setTimeout(() => {
+    document.getElementById('calibScreen').classList.remove('show');
+    startCountdown();
+  }, 700);
+}
+
+// ─────────────────────────────────────────────────────────────
+//  KEYBOARD FALLBACK (desktop)
+// ─────────────────────────────────────────────────────────────
 const keys={};
 window.addEventListener('keydown',e=>keys[e.key]=true);
 window.addEventListener('keyup',  e=>keys[e.key]=false);
 function applyKeyboard(){
   if(gyroOn) return;
-  if     (keys['ArrowLeft'] ||keys['a']) tiltX=Math.max(-1,tiltX-.15);
-  else if(keys['ArrowRight']||keys['d']) tiltX=Math.min( 1,tiltX+.15);
-  else tiltX*=.8;
-  if     (keys['ArrowUp']   ||keys['w']) tiltY=Math.max(-1,tiltY-.15);
-  else if(keys['ArrowDown'] ||keys['s']) tiltY=Math.min( 1,tiltY+.15);
-  else tiltY*=.8;
+  if     (keys['ArrowLeft'] ||keys['a']) tiltX=Math.max(-1,tiltX-.12);
+  else if(keys['ArrowRight']||keys['d']) tiltX=Math.min( 1,tiltX+.12);
+  else tiltX*=.82;
+  if     (keys['ArrowUp']   ||keys['w']) tiltY=Math.max(-1,tiltY-.12);
+  else if(keys['ArrowDown'] ||keys['s']) tiltY=Math.min( 1,tiltY+.12);
+  else tiltY*=.82;
 }
+
+// ─────────────────────────────────────────────────────────────
+//  PHYSICS CONSTANTS — much less sensitive than before
+// ─────────────────────────────────────────────────────────────
+// (override the consts defined earlier)
+const GRAVITY_HOLD_V2 = 0.003;
+const GRAVITY_PLAY_V2 = 0.009;   // half what it was
+const CORRECT_V2      = 0.016;   // correction is stronger relative to gravity
+const FRICTION_V2     = 0.974;
+const FALL_DIST_V2    = 620;      // larger safe zone
+
+// Patch physicsStep to use new values
+// We redefine here (shadows the earlier consts via closure)
+const _origPhysics = physicsStep;
+physicsStep = function(dt){
+  const G = phase===PHASE_HOLD ? GRAVITY_HOLD_V2 : GRAVITY_PLAY_V2;
+  pvX += windX * dt * 60;
+  pvY += windY * dt * 60;
+  pvX += panX  * G * dt * 60;
+  pvY += panY  * G * dt * 60;
+  if(phase!==PHASE_DEAD){
+    pvX -= tiltX * CORRECT_V2 * dt * 60;
+    pvY -= tiltY * CORRECT_V2 * dt * 60;
+  }
+  pvX *= Math.pow(FRICTION_V2, dt*60);
+  pvY *= Math.pow(FRICTION_V2, dt*60);
+  panX += pvX;
+  panY += pvY;
+  if(phase===PHASE_HOLD){ panX*=.94; panY*=.94; pvX*=.94; pvY*=.94; }
+
+  const bx=Math.max(0,Math.min(100,50+panX/FALL_DIST_V2*48));
+  const by=Math.max(0,Math.min(100,50+panY/FALL_DIST_V2*48));
+  document.getElementById('bcX').style.left=bx+'%';
+  document.getElementById('bcY').style.left=by+'%';
+  const danger=Math.sqrt(panX**2+panY**2)/FALL_DIST_V2;
+  const col=danger<0.35?'#22c55e':danger<0.7?'#f59e0b':'#ef4444';
+  document.getElementById('bcX').style.background=col;
+  document.getElementById('bcY').style.background=col;
+  if(phase===PHASE_PLAY && Math.sqrt(panX**2+panY**2)>FALL_DIST_V2) triggerFall();
+};
 
 // ─────────────────────────────────────────────────────────────
 //  BOOT SEQUENCE
@@ -994,7 +1170,8 @@ function beginGame(){
   setTimeout(()=>sp.style.display='none',700);
   panX=0; panY=0; pvX=0; pvY=0; fallT=0;
   animId=requestAnimationFrame(loop);
-  setTimeout(startCountdown, 800);
+  // Short pause then calibrate
+  setTimeout(startCalibration, 600);
 }
 
 function requestGyroPermission(){
