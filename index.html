@@ -2,863 +2,1000 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
 <title>THE SPIRE</title>
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow+Condensed:wght@300;400;600&display=swap');
-*{margin:0;padding:0;box-sizing:border-box;}
-html,body{width:100%;height:100%;overflow:hidden;background:#000;font-family:'Barlow Condensed',sans-serif;}
+@import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow+Condensed:ital,wght@0,300;0,400;0,600;1,300&display=swap');
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+html,body{width:100%;height:100%;overflow:hidden;background:#0a0a0a;touch-action:none;}
+canvas{position:fixed;inset:0;width:100%;height:100%;display:block;}
 
-#canvas{position:fixed;inset:0;width:100%;height:100%;display:block;}
-
-/* ── SPLASH ── */
+/* SPLASH */
 #splash{
   position:fixed;inset:0;z-index:100;
-  background:radial-gradient(ellipse at 50% 30%,#1a1a2e 0%,#000 70%);
   display:flex;flex-direction:column;align-items:center;justify-content:center;
-  transition:opacity .6s;
+  background:#000;
+  transition:opacity .8s ease;
 }
 #splash h1{
   font-family:'Bebas Neue',sans-serif;
-  font-size:clamp(4rem,18vw,7rem);
-  letter-spacing:.15em;
-  color:#fff;
-  text-shadow:0 0 60px rgba(100,200,255,.4),0 0 120px rgba(100,200,255,.15);
-  margin-bottom:.1em;
+  font-size:clamp(5rem,22vw,9rem);
+  letter-spacing:.12em;color:#fff;
+  text-shadow:0 0 80px rgba(255,200,80,.25);
+  line-height:1;margin-bottom:.05em;
 }
-#splash .tagline{
-  font-size:clamp(.9rem,3.5vw,1.2rem);
-  font-weight:300;letter-spacing:.4em;text-transform:uppercase;
-  color:rgba(255,255,255,.45);margin-bottom:3.5rem;
+#splash .sub{
+  font-family:'Barlow Condensed',sans-serif;font-weight:300;
+  font-size:clamp(.75rem,3vw,1rem);letter-spacing:.55em;
+  color:rgba(255,255,255,.35);text-transform:uppercase;margin-bottom:.6rem;
 }
-.altitude{
-  font-family:'Bebas Neue',sans-serif;
-  font-size:clamp(1rem,4vw,1.4rem);letter-spacing:.2em;
-  color:rgba(100,200,255,.7);margin-bottom:2.5rem;
+#splash .stat{
+  font-family:'Bebas Neue',sans-serif;font-size:clamp(1rem,4vw,1.4rem);
+  letter-spacing:.2em;color:rgba(255,190,60,.75);margin-bottom:3rem;
 }
 #startBtn{
-  font-family:'Bebas Neue',sans-serif;
-  font-size:clamp(1.1rem,4.5vw,1.5rem);letter-spacing:.25em;
-  padding:14px 52px;border:1px solid rgba(255,255,255,.3);border-radius:2px;
-  background:rgba(255,255,255,.06);color:#fff;cursor:pointer;
-  backdrop-filter:blur(4px);
-  box-shadow:0 0 40px rgba(100,200,255,.15);
-  transition:background .2s,box-shadow .2s;
+  font-family:'Bebas Neue',sans-serif;font-size:clamp(1rem,4.5vw,1.4rem);
+  letter-spacing:.3em;padding:15px 52px;
+  border:1px solid rgba(255,255,255,.25);border-radius:2px;
+  background:rgba(255,255,255,.05);color:#fff;cursor:pointer;
+  box-shadow:0 0 40px rgba(255,190,60,.1);
+  -webkit-appearance:none;
 }
-#startBtn:active{background:rgba(255,255,255,.15);}
+#startBtn:active{background:rgba(255,255,255,.12);}
 
-/* ── PERM BANNER ── */
+/* PERM */
 #permBanner{
-  position:fixed;inset:0;z-index:200;
-  background:radial-gradient(ellipse at 50% 30%,#1a1a2e,#000 70%);
+  position:fixed;inset:0;z-index:200;background:#000;
   display:none;flex-direction:column;align-items:center;justify-content:center;
   text-align:center;padding:2rem;
 }
 #permBanner.show{display:flex;}
-#permBanner h2{font-family:'Bebas Neue',sans-serif;font-size:2.2rem;letter-spacing:.15em;color:#fff;margin-bottom:.8rem;}
-#permBanner p{font-weight:300;font-size:1rem;letter-spacing:.1em;color:rgba(255,255,255,.5);margin-bottom:2.5rem;max-width:280px;line-height:1.7;}
-#permBtn{
-  font-family:'Bebas Neue',sans-serif;font-size:1.3rem;letter-spacing:.25em;
-  padding:14px 48px;border:1px solid rgba(255,255,255,.3);border-radius:2px;
-  background:rgba(255,255,255,.07);color:#fff;cursor:pointer;
-}
+#permBanner h2{font-family:'Bebas Neue',sans-serif;font-size:2.4rem;letter-spacing:.15em;color:#fff;margin-bottom:.6rem;}
+#permBanner p{font-family:'Barlow Condensed',sans-serif;font-weight:300;font-size:1rem;
+  letter-spacing:.1em;color:rgba(255,255,255,.45);margin-bottom:2.5rem;max-width:280px;line-height:1.8;}
+#permBtn{font-family:'Bebas Neue',sans-serif;font-size:1.3rem;letter-spacing:.25em;
+  padding:14px 48px;border:1px solid rgba(255,255,255,.25);border-radius:2px;
+  background:rgba(255,255,255,.06);color:#fff;cursor:pointer;}
 
-/* ── HUD ── */
+/* HUD */
 #hud{
-  position:fixed;top:0;left:0;right:0;z-index:10;
-  padding:14px 20px;display:flex;justify-content:space-between;align-items:flex-start;
+  position:fixed;top:0;left:0;right:0;z-index:20;
+  padding:14px 20px;
+  display:flex;justify-content:space-between;align-items:flex-start;
   pointer-events:none;
 }
-.hud-box{display:flex;flex-direction:column;gap:2px;}
-.hud-label{font-size:.65rem;letter-spacing:.25em;text-transform:uppercase;color:rgba(255,255,255,.3);}
-.hud-value{font-family:'Bebas Neue',sans-serif;font-size:1.6rem;letter-spacing:.1em;color:#fff;}
-#balanceBar{
-  position:fixed;bottom:0;left:0;right:0;z-index:10;
-  padding:18px 24px;pointer-events:none;
-  display:flex;flex-direction:column;gap:6px;
-}
-.bar-label{font-size:.6rem;letter-spacing:.3em;text-transform:uppercase;color:rgba(255,255,255,.3);text-align:center;}
-.bar-track{height:4px;background:rgba(255,255,255,.1);border-radius:2px;position:relative;overflow:visible;}
-.bar-fill{height:100%;border-radius:2px;background:linear-gradient(90deg,#f59e0b,#ef4444);transition:width .05s;}
-.bar-center{position:absolute;top:-3px;left:50%;width:2px;height:10px;background:rgba(255,255,255,.4);transform:translateX(-50%);}
-.bar-cursor{
-  position:absolute;top:-6px;width:4px;height:16px;
-  background:#fff;border-radius:1px;transform:translateX(-50%);
-  transition:left .05s;box-shadow:0 0 8px rgba(255,255,255,.8);
-}
+.hv{display:flex;flex-direction:column;gap:1px;}
+.hl{font-family:'Barlow Condensed',sans-serif;font-size:.6rem;letter-spacing:.3em;
+  text-transform:uppercase;color:rgba(255,255,255,.28);}
+.hn{font-family:'Bebas Neue',sans-serif;font-size:1.55rem;letter-spacing:.1em;color:#fff;}
+#windHud{align-items:flex-end;}
 
-/* ── OVERLAY ── */
+/* BALANCE */
+#balWrap{
+  position:fixed;bottom:0;left:0;right:0;z-index:20;
+  padding:16px 24px 22px;pointer-events:none;
+  display:flex;flex-direction:column;gap:8px;
+}
+.blabel{font-family:'Barlow Condensed',sans-serif;font-size:.58rem;
+  letter-spacing:.3em;text-transform:uppercase;color:rgba(255,255,255,.28);text-align:center;}
+.btrack{position:relative;height:3px;background:rgba(255,255,255,.1);border-radius:2px;overflow:visible;}
+.bcenter{position:absolute;top:-4px;left:50%;width:1px;height:11px;
+  background:rgba(255,255,255,.35);transform:translateX(-50%);}
+.bcursor{position:absolute;top:-7px;width:3px;height:17px;
+  background:#fff;border-radius:1px;transform:translateX(-50%);
+  transition:left .04s linear;box-shadow:0 0 10px rgba(255,255,255,.9);}
+
+/* COUNTDOWN */
+#countdown{
+  position:fixed;inset:0;z-index:30;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  pointer-events:none;
+}
+#cdNum{
+  font-family:'Bebas Neue',sans-serif;
+  font-size:clamp(7rem,30vw,13rem);
+  letter-spacing:.05em;color:#fff;
+  text-shadow:0 0 100px rgba(255,200,60,.6);
+  line-height:1;
+  animation:cdPop .4s ease-out;
+  opacity:0;
+}
+#cdMsg{
+  font-family:'Barlow Condensed',sans-serif;font-weight:300;
+  font-size:clamp(.8rem,3.5vw,1.1rem);letter-spacing:.45em;
+  text-transform:uppercase;color:rgba(255,255,255,.45);
+  margin-top:.5rem;opacity:0;
+}
+@keyframes cdPop{0%{transform:scale(1.4);opacity:.8}100%{transform:scale(1);opacity:1}}
+
+/* HOLD GRIP overlay */
+#holdBar{
+  position:fixed;bottom:80px;left:50%;transform:translateX(-50%);
+  z-index:31;width:min(300px,72vw);
+  display:flex;flex-direction:column;align-items:center;gap:6px;
+  pointer-events:none;opacity:0;transition:opacity .3s;
+}
+#holdBar.show{opacity:1;}
+#holdBar p{font-family:'Barlow Condensed',sans-serif;font-weight:300;
+  font-size:.7rem;letter-spacing:.4em;text-transform:uppercase;color:rgba(255,255,255,.4);}
+#holdTrack{width:100%;height:3px;background:rgba(255,255,255,.12);border-radius:2px;position:relative;}
+#holdFill{height:100%;width:0%;background:rgba(255,190,60,.8);border-radius:2px;transition:width .1s linear;}
+
+/* GAME OVER */
 #overlay{
   position:fixed;inset:0;z-index:50;
-  background:rgba(0,0,0,.82);
+  background:rgba(0,0,0,.88);
   display:none;flex-direction:column;align-items:center;justify-content:center;
-  backdrop-filter:blur(6px);
+  backdrop-filter:blur(8px);
 }
 #overlay.show{display:flex;}
-#overlay .over-big{font-family:'Bebas Neue',sans-serif;font-size:clamp(3rem,14vw,5.5rem);
-  letter-spacing:.12em;color:#fff;text-shadow:0 0 60px rgba(239,68,68,.5);margin-bottom:.3em;}
-#overlay .over-sub{font-weight:300;font-size:clamp(.9rem,3.5vw,1.1rem);letter-spacing:.3em;
-  text-transform:uppercase;color:rgba(255,255,255,.5);margin-bottom:2.5rem;}
-#overlay .over-score{font-family:'Bebas Neue',sans-serif;font-size:clamp(1.4rem,5vw,2rem);
-  letter-spacing:.15em;color:rgba(100,200,255,.9);margin-bottom:2.5rem;}
-#retryBtn{
-  font-family:'Bebas Neue',sans-serif;font-size:1.3rem;letter-spacing:.25em;
-  padding:14px 48px;border:1px solid rgba(255,255,255,.3);border-radius:2px;
-  background:rgba(255,255,255,.07);color:#fff;cursor:pointer;
-}
+.obig{font-family:'Bebas Neue',sans-serif;font-size:clamp(3.5rem,16vw,6rem);
+  letter-spacing:.1em;color:#fff;text-shadow:0 0 80px rgba(239,68,68,.55);margin-bottom:.2em;}
+.osub{font-family:'Barlow Condensed',sans-serif;font-weight:300;
+  font-size:clamp(.85rem,3.5vw,1.05rem);letter-spacing:.35em;
+  text-transform:uppercase;color:rgba(255,255,255,.4);margin-bottom:2rem;}
+.oscr{font-family:'Bebas Neue',sans-serif;font-size:clamp(1.4rem,5vw,2rem);
+  letter-spacing:.15em;color:rgba(255,190,60,.9);margin-bottom:2.5rem;}
+#retryBtn{font-family:'Bebas Neue',sans-serif;font-size:1.3rem;letter-spacing:.25em;
+  padding:14px 48px;border:1px solid rgba(255,255,255,.25);border-radius:2px;
+  background:rgba(255,255,255,.07);color:#fff;cursor:pointer;}
 </style>
 </head>
 <body>
 
+<!-- SPLASH -->
 <div id="splash">
   <h1>THE SPIRE</h1>
-  <div class="tagline">828 metres above the ground</div>
-  <div class="altitude">Burj Khalifa · Dubai</div>
-  <button id="startBtn">CLIMB TO THE TOP</button>
+  <div class="sub">Burj Khalifa · Dubai</div>
+  <div class="stat">828 METRES ABOVE THE STREET</div>
+  <button id="startBtn">STEP TO THE EDGE</button>
 </div>
 
+<!-- PERM -->
 <div id="permBanner">
-  <h2>ALLOW MOTION</h2>
-  <p>This game requires your device's gyroscope to keep your balance on the spire.</p>
-  <button id="permBtn">GRANT ACCESS</button>
+  <h2>MOTION ACCESS</h2>
+  <p>This game uses your gyroscope to keep you balanced on the spire.</p>
+  <button id="permBtn">ALLOW MOTION</button>
 </div>
 
+<!-- HUD -->
 <div id="hud">
-  <div class="hud-box">
-    <span class="hud-label">Altitude</span>
-    <span class="hud-value" id="altDisplay">828m</span>
-  </div>
-  <div class="hud-box" style="align-items:center;">
-    <span class="hud-label">Survived</span>
-    <span class="hud-value" id="timeDisplay">0s</span>
-  </div>
-  <div class="hud-box" style="align-items:flex-end;">
-    <span class="hud-label">Wind</span>
-    <span class="hud-value" id="windDisplay">12 km/h</span>
-  </div>
+  <div class="hv"><span class="hl">Altitude</span><span class="hn">828m</span></div>
+  <div class="hv" style="align-items:center"><span class="hl">Survived</span><span class="hn" id="timeHud">0s</span></div>
+  <div class="hv" id="windHud"><span class="hl">Wind</span><span class="hn" id="windHudVal">—</span></div>
 </div>
 
-<canvas id="canvas"></canvas>
+<!-- CANVAS -->
+<canvas id="c"></canvas>
 
-<div id="balanceBar">
-  <div class="bar-label">BALANCE</div>
-  <div class="bar-track" id="barTrackX">
-    <div class="bar-center"></div>
-    <div class="bar-cursor" id="barCursorX" style="left:50%"></div>
-  </div>
-  <div class="bar-track" id="barTrackY" style="margin-top:4px;">
-    <div class="bar-center"></div>
-    <div class="bar-cursor" id="barCursorY" style="left:50%"></div>
-  </div>
+<!-- COUNTDOWN -->
+<div id="countdown">
+  <div id="cdNum"></div>
+  <div id="cdMsg"></div>
 </div>
 
+<!-- HOLD BAR -->
+<div id="holdBar">
+  <p>GRIP THE SPIRE — HOLD STILL</p>
+  <div id="holdTrack"><div id="holdFill"></div></div>
+</div>
+
+<!-- BALANCE -->
+<div id="balWrap">
+  <div class="blabel">BALANCE</div>
+  <div class="btrack"><div class="bcenter"></div><div class="bcursor" id="bcX" style="left:50%"></div></div>
+  <div class="btrack" style="margin-top:4px"><div class="bcenter"></div><div class="bcursor" id="bcY" style="left:50%"></div></div>
+</div>
+
+<!-- GAME OVER -->
 <div id="overlay">
-  <div class="over-big" id="overBig">YOU FELL</div>
-  <div class="over-sub" id="overSub">828 metres straight down</div>
-  <div class="over-score" id="overScore">0 seconds</div>
+  <div class="obig">YOU FELL</div>
+  <div class="osub" id="oSub">828 metres · straight down</div>
+  <div class="oscr" id="oScr"></div>
   <button id="retryBtn">TRY AGAIN</button>
 </div>
 
 <script>
-// ═══════════════════════════════════════════════════════════
-//  CANVAS + GLOBALS
-// ═══════════════════════════════════════════════════════════
-const canvas = document.getElementById('canvas');
-const ctx    = canvas.getContext('2d');
+// ─────────────────────────────────────────────────────────────
+//  CANVAS
+// ─────────────────────────────────────────────────────────────
+const cv  = document.getElementById('c');
+const ctx = cv.getContext('2d');
 let W, H;
-function resize(){ W=canvas.width=window.innerWidth; H=canvas.height=window.innerHeight; }
+function resize(){ W = cv.width = window.innerWidth; H = cv.height = window.innerHeight; }
 resize();
-window.addEventListener('resize', resize);
+window.addEventListener('resize', () => { resize(); buildCity(); });
 
-// ═══════════════════════════════════════════════════════════
-//  GYRO / TILT STATE
-// ═══════════════════════════════════════════════════════════
-let tiltX=0, tiltY=0;      // -1 to 1 lean
-let gyroEnabled=false;
+// ─────────────────────────────────────────────────────────────
+//  SEEDED RNG
+// ─────────────────────────────────────────────────────────────
+let _s = 9317;
+function rng(){ _s=(_s*1664525+1013904223)>>>0; return _s/4294967295; }
+function rngR(a,b){ return a+rng()*(b-a); }
 
-// camera lean (smooth)
-let camLeanX=0, camLeanY=0;  // accumulated lean from physics
-let camVX=0,    camVY=0;     // lean velocity
+// ─────────────────────────────────────────────────────────────
+//  CITY GEOMETRY  — true nadir (straight-down) view
+//  Everything is in world pixels where 1 world unit ≈ 1 metre.
+//  The view frustum covers roughly 2km × 2km of city.
+//  We scale so the world fits the screen.
+// ─────────────────────────────────────────────────────────────
+const WORLD  = 2200;   // metres across the view
+let   SCALE;           // world→screen pixels
+let   OX, OY;          // screen centre
 
-// ═══════════════════════════════════════════════════════════
-//  CITY BUILDINGS  (random seed, generated once)
-// ═══════════════════════════════════════════════════════════
-const rng=(()=>{ let s=42; return ()=>{ s=(s*1664525+1013904223)&0xffffffff; return (s>>>0)/0xffffffff; }; })();
+// City grid
+const BLOCK_W = 120, BLOCK_H = 90, ROAD_W = 22;
+const GRID_COLS = Math.floor(WORLD/(BLOCK_W+ROAD_W));
+const GRID_ROWS = Math.floor(WORLD/(BLOCK_H+ROAD_W));
 
-const NUM_BUILDINGS = 260;
-const buildings = [];
-for(let i=0;i<NUM_BUILDINGS;i++){
-  const angle = rng()*Math.PI*2;
-  const dist  = 120 + rng()*1800;
-  buildings.push({
-    angle,
-    dist,
-    width:  18 + rng()*80,
-    depth:  18 + rng()*80,
-    height: 20 + rng()*280,
-    hue:    200 + rng()*40,
-    lit:    rng()>0.45,
-    litCol: `hsl(${40+rng()*20},${60+rng()*30}%,${60+rng()*20}%)`,
-  });
+// Pre-built geometry (rebuilt on resize)
+let cityBlocks  = [];   // {x,y,w,h,col,rooftopCol,roofType,hasPool,hasTank}
+let cityRoads   = [];   // {x,y,w,h}  — road rectangles
+let cityParking = [];   // {x,y,w,h,angle}
+let cityPools   = [];   // {cx,cy,r,col}
+let cityCars    = [];   // {x,y,len,wid,angle,col,spd,lane}
+let cityTrees   = [];   // {x,y,r}
+
+function buildCity(){
+  _s = 9317; // reset seed for consistent city
+  SCALE = Math.min(W,H) / WORLD;
+  OX = W/2; OY = H/2;
+
+  cityBlocks  = [];
+  cityRoads   = [];
+  cityParking = [];
+  cityPools   = [];
+  cityCars    = [];
+  cityTrees   = [];
+
+  const hw = WORLD/2;
+
+  // ── Road grid ──
+  // Horizontal roads
+  for(let r=0; r<=GRID_ROWS; r++){
+    const wy = -hw + r*(BLOCK_H+ROAD_W);
+    cityRoads.push({x:-hw, y:wy, w:WORLD, h:ROAD_W, horiz:true});
+  }
+  // Vertical roads
+  for(let c=0; c<=GRID_COLS; c++){
+    const wx = -hw + c*(BLOCK_W+ROAD_W);
+    cityRoads.push({x:wx, y:-hw, w:ROAD_W, h:WORLD, horiz:false});
+  }
+
+  // ── City blocks & buildings ──
+  for(let r=0; r<GRID_ROWS; r++){
+    for(let c=0; c<GRID_COLS; c++){
+      const bx = -hw + c*(BLOCK_W+ROAD_W) + ROAD_W;
+      const by = -hw + r*(BLOCK_H+ROAD_W) + ROAD_W;
+
+      // Each block: 1–4 buildings with setbacks
+      const nBuildings = rng()<.3 ? 1 : rng()<.5 ? 2 : rng()<.7 ? 3 : 4;
+      if(nBuildings===1){
+        // Single large building
+        const pad = rngR(3,10);
+        const bw = BLOCK_W - pad*2, bd = BLOCK_H - pad*2;
+        const hue = rngR(195,230);
+        const light = rngR(28,46);
+        cityBlocks.push({
+          x:bx+pad, y:by+pad, w:bw, h:bd,
+          col:`hsl(${hue},${rngR(8,20)}%,${light}%)`,
+          roofCol:`hsl(${hue},${rngR(10,22)}%,${light+8}%)`,
+          tall: rng()>.55,
+          hasAC: rng()>.4,
+          hasPool: rng()>.85,
+          hasPad: rng()>.9,
+        });
+        if(rng()>.85){
+          cityPools.push({cx:bx+BLOCK_W/2+rngR(-10,10), cy:by+BLOCK_H/2+rngR(-5,5), rw:rngR(6,12), rh:rngR(4,8)});
+        }
+      } else {
+        // Split block into sub-buildings
+        const subW = BLOCK_W/2 - 3;
+        const subH = BLOCK_H/(nBuildings>2?2:1) - 3;
+        for(let i=0;i<nBuildings;i++){
+          const sx = bx + (i%2)*(subW+4);
+          const sy = by + Math.floor(i/2)*(subH+4);
+          const hue = rngR(200,230);
+          const light = rngR(30,48);
+          cityBlocks.push({
+            x:sx+2, y:sy+2, w:subW-4, h:subH-4,
+            col:`hsl(${hue},${rngR(8,18)}%,${light}%)`,
+            roofCol:`hsl(${hue},${rngR(10,22)}%,${light+6}%)`,
+            tall:rng()>.6, hasAC:rng()>.4, hasPool:false, hasPad:rng()>.95
+          });
+        }
+        // Parking lot in some gaps
+        if(rng()>.65){
+          cityParking.push({x:bx+2, y:by+BLOCK_H*0.6, w:BLOCK_W-4, h:BLOCK_H*0.35, angle:0});
+        }
+      }
+
+      // Street trees along block edges
+      for(let t=0;t<rngR(1,4);t++){
+        cityTrees.push({
+          x: bx+rngR(2,BLOCK_W-2),
+          y: by-rngR(2,8),
+          r: rngR(2,5)
+        });
+        cityTrees.push({
+          x: bx+rngR(2,BLOCK_W-2),
+          y: by+BLOCK_H+rngR(2,8),
+          r: rngR(2,5)
+        });
+      }
+    }
+  }
+
+  // ── Cars on roads ──
+  // Horizontal lanes
+  for(let r=0; r<=GRID_ROWS; r++){
+    const wy = -hw + r*(BLOCK_H+ROAD_W) + ROAD_W/2;
+    const nCars = Math.floor(rngR(4,14));
+    for(let i=0;i<nCars;i++){
+      const lane = rng()>.5 ? 1 : -1;
+      cityCars.push({
+        x: rngR(-hw, hw),
+        y: wy + lane*ROAD_W*0.18,
+        len:rngR(8,15), wid:rngR(4,6),
+        angle: lane>0?0:Math.PI,
+        col: carColour(),
+        spd: rngR(0.4,1.2)*lane,
+        horiz:true, lane,
+        road_y: wy,
+      });
+    }
+  }
+  // Vertical lanes
+  for(let c=0; c<=GRID_COLS; c++){
+    const wx = -hw + c*(BLOCK_W+ROAD_W) + ROAD_W/2;
+    const nCars = Math.floor(rngR(4,14));
+    for(let i=0;i<nCars;i++){
+      const lane = rng()>.5 ? 1 : -1;
+      cityCars.push({
+        x: wx + lane*ROAD_W*0.18,
+        y: rngR(-hw, hw),
+        len:rngR(8,15), wid:rngR(4,6),
+        angle: lane>0?Math.PI/2:-Math.PI/2,
+        col: carColour(),
+        spd: rngR(0.4,1.2)*lane,
+        horiz:false, lane,
+        road_x: wx,
+      });
+    }
+  }
 }
 
-// Road grid lines (top-down, radial + grid)
-const ROADS = [];
-for(let i=0;i<12;i++) ROADS.push({ angle: i/12*Math.PI*2, radial:true });
-for(let i=0;i<5;i++){
-  const r=200+i*300;
-  ROADS.push({ r, radial:false });
+function carColour(){
+  const cols=['#e8e8e8','#c0c0c0','#1a1a1a','#2a2a2a','#a03020','#204060','#e8d080','#60a060'];
+  return cols[Math.floor(rng()*cols.length)];
 }
 
-// ═══════════════════════════════════════════════════════════
-//  WIND
-// ═══════════════════════════════════════════════════════════
-let windX=0, windY=0;
-let windTimer=0;
-let windSpeed=12;
+buildCity();
+
+// ─────────────────────────────────────────────────────────────
+//  TILT / PHYSICS
+// ─────────────────────────────────────────────────────────────
+let tiltX=0, tiltY=0, gyroOn=false;
+
+// Camera pan (world coords) — leans accumulate here
+let panX=0, panY=0, pvX=0, pvY=0;
+
+// During HOLD phase: tilt is constrained, gentle sway only
+// During PLAY phase: full lean physics
+const PHASE_HOLD = 'hold';
+const PHASE_PLAY = 'play';
+const PHASE_DEAD = 'dead';
+let phase = PHASE_HOLD;
+
+// Physics constants
+const GRAVITY_HOLD = 0.006;   // gentle sway while holding
+const GRAVITY_PLAY = 0.018;   // lean compounds when free
+const CORRECT      = 0.022;   // tilt correction strength
+const FRICTION     = 0.968;
+const FALL_DIST    = 520;      // world units off-centre before fall
+
+// Wind
+let windX=0, windY=0, windKph=0, windTimer=0;
 function updateWind(dt){
   windTimer+=dt;
-  if(windTimer>3+Math.random()*4){
+  const interval = phase===PHASE_HOLD ? 999 : 2.5+rngR(0,3.5);
+  if(windTimer>interval){
     windTimer=0;
-    windX=(Math.random()-.5)*0.28;
-    windY=(Math.random()-.5)*0.18;
-    windSpeed=Math.round(8+Math.random()*20);
-    document.getElementById('windDisplay').textContent=windSpeed+' km/h';
+    const angle=rng()*Math.PI*2;
+    const str = phase===PHASE_PLAY ? rngR(0.04,0.22) : 0.01;
+    windX = Math.cos(angle)*str;
+    windY = Math.sin(angle)*str;
+    windKph = Math.round(str*220);
+    document.getElementById('windHudVal').textContent = windKph+' km/h';
   }
 }
 
-// ═══════════════════════════════════════════════════════════
-//  PARTICLES (wind streaks)
-// ═══════════════════════════════════════════════════════════
-const windParticles=[];
-function spawnWind(){
-  if(windParticles.length>60) return;
-  windParticles.push({
-    x: Math.random()*W, y: Math.random()*H*0.6,
-    len: 30+Math.random()*80,
-    speed: 2+Math.random()*4,
-    angle: Math.atan2(windY||.1,windX||.2)+( Math.random()-.5)*.4,
-    alpha: .05+Math.random()*.12,
-    life:1, decay:.015+Math.random()*.025
-  });
-}
-function updateWindParticles(){
-  for(const p of windParticles){
-    p.x+=Math.cos(p.angle)*p.speed;
-    p.y+=Math.sin(p.angle)*p.speed;
-    p.life-=p.decay;
+function physicsStep(dt){
+  const G = phase===PHASE_HOLD ? GRAVITY_HOLD : GRAVITY_PLAY;
+
+  pvX += windX * dt * 60;
+  pvY += windY * dt * 60;
+  pvX += panX  * G * dt * 60;
+  pvY += panY  * G * dt * 60;
+
+  if(phase!==PHASE_DEAD){
+    pvX -= tiltX * CORRECT * dt * 60;
+    pvY -= tiltY * CORRECT * dt * 60;
   }
-  windParticles.splice(0,windParticles.length,...windParticles.filter(p=>p.life>0));
-  if(Math.random()<.35) spawnWind();
+
+  pvX *= Math.pow(FRICTION, dt*60);
+  pvY *= Math.pow(FRICTION, dt*60);
+  panX += pvX;
+  panY += pvY;
+
+  // Clamp during hold
+  if(phase===PHASE_HOLD){
+    panX *= 0.92; panY *= 0.92;
+    pvX  *= 0.92; pvY  *= 0.92;
+  }
+
+  // Balance bar update
+  const bx = Math.max(0,Math.min(100,50+panX/FALL_DIST*48));
+  const by = Math.max(0,Math.min(100,50+panY/FALL_DIST*48));
+  document.getElementById('bcX').style.left = bx+'%';
+  document.getElementById('bcY').style.left = by+'%';
+  const danger = Math.sqrt(panX**2+panY**2)/FALL_DIST;
+  const col = danger<0.35?'#22c55e':danger<0.7?'#f59e0b':'#ef4444';
+  document.getElementById('bcX').style.background=col;
+  document.getElementById('bcY').style.background=col;
+
+  if(phase===PHASE_PLAY && Math.sqrt(panX**2+panY**2)>FALL_DIST) triggerFall();
 }
-function drawWindParticles(){
+
+// ─────────────────────────────────────────────────────────────
+//  WIND STREAKS
+// ─────────────────────────────────────────────────────────────
+const streaks=[];
+function updateStreaks(){
+  if(phase!==PHASE_PLAY) return;
+  if(streaks.length<55 && Math.random()<.4){
+    const a=Math.atan2(windY||.05,windX||.1)+(Math.random()-.5)*.5;
+    streaks.push({
+      x:Math.random()*W, y:Math.random()*H*.7,
+      len:25+Math.random()*70,
+      spd:1.5+Math.random()*3,
+      ang:a, alpha:.04+Math.random()*.1,
+      life:1, decay:.018+Math.random()*.022
+    });
+  }
+  for(const s of streaks){ s.x+=Math.cos(s.ang)*s.spd; s.y+=Math.sin(s.ang)*s.spd; s.life-=s.decay; }
+  streaks.splice(0,streaks.length,...streaks.filter(s=>s.life>0));
+}
+function drawStreaks(){
   ctx.save();
-  for(const p of windParticles){
-    ctx.globalAlpha=p.alpha*p.life;
-    ctx.strokeStyle='#a0c8ff';
-    ctx.lineWidth=.7;
+  for(const s of streaks){
+    ctx.globalAlpha=s.alpha*s.life;
+    ctx.strokeStyle='#c8ddf0'; ctx.lineWidth=.7;
     ctx.beginPath();
-    ctx.moveTo(p.x,p.y);
-    ctx.lineTo(p.x-Math.cos(p.angle)*p.len, p.y-Math.sin(p.angle)*p.len);
+    ctx.moveTo(s.x,s.y);
+    ctx.lineTo(s.x-Math.cos(s.ang)*s.len, s.y-Math.sin(s.ang)*s.len);
     ctx.stroke();
   }
   ctx.restore();
 }
 
-// ═══════════════════════════════════════════════════════════
-//  GAME STATE
-// ═══════════════════════════════════════════════════════════
-let gameRunning=false;
-let survived=0;
-let fallAnim=0;  // 0=none, >0=falling
-let bestTime=0;
+// ─────────────────────────────────────────────────────────────
+//  WORLD → SCREEN
+// ─────────────────────────────────────────────────────────────
+// The "camera" sits at (panX, panY) in world space.
+// Everything shifts opposite to the lean — as you lean right,
+// the city slides LEFT (you drift right over the city).
+// We also apply a mild perspective tilt: the horizon lifts
+// slightly on the lean side (the "floor" tilts toward you).
 
-// ═══════════════════════════════════════════════════════════
-//  PERSPECTIVE PROJECTION
-//  We look STRAIGHT DOWN. camLeanX/Y tilt the horizon.
-//  Buildings are drawn as top-down rectangles with
-//  a perspective-foreshortened view.
-// ═══════════════════════════════════════════════════════════
+function wx2s(wx){ return OX + (wx - panX) * SCALE; }
+function wy2s(wy){ return OY + (wy - panY) * SCALE; }
+function ws2s(ws){ return ws * SCALE; }
 
-// Project world XZ → screen XY
-// camLean shifts the vanishing point, giving the lean effect
-function project(worldX, worldZ, altitude){
-  // altitude = how high above ground (828m for spire top)
-  const FOCAL = H * 0.82;
-  const groundDist = altitude; // metres above ground
-
-  // lean shifts apparent horizon
-  const vanishX = W/2 + camLeanX * W * 0.55;
-  const vanishY = H/2 + camLeanY * H * 0.55;
-
-  // perspective scale: things at worldZ=0 (ground) fill screen
-  // things far away shrink
-  const scale = FOCAL / (groundDist + worldZ*0.001 + 0.001);
-
-  const sx = vanishX + worldX * scale * 0.0016;
-  const sy = vanishY + worldZ * scale * 0.0016;  // Z is depth away
-
-  return {sx, sy, scale};
-}
-
-// ═══════════════════════════════════════════════════════════
+// ─────────────────────────────────────────────────────────────
 //  DRAW SCENE
-// ═══════════════════════════════════════════════════════════
+// ─────────────────────────────────────────────────────────────
 let frame=0;
-function draw(){
-  frame++;
 
-  // ── Background sky / haze ──
-  const skyGrad = ctx.createRadialGradient(W/2,H/2,0, W/2,H/2,Math.max(W,H)*0.75);
-  skyGrad.addColorStop(0,'#c8d8f0');
-  skyGrad.addColorStop(0.35,'#a0b8d8');
-  skyGrad.addColorStop(0.7,'#6080a0');
-  skyGrad.addColorStop(1,'#2a3a50');
-  ctx.fillStyle=skyGrad;
+function drawCity(){
+  // ── Ground / tarmac base ──
+  ctx.fillStyle = '#3a3a38';
   ctx.fillRect(0,0,W,H);
 
-  // ── Atmospheric haze circle (ground far below) ──
-  const cx = W/2 + camLeanX*W*0.55;
-  const cy = H/2 + camLeanY*H*0.55;
-
-  // Ground plane — huge blurred oval at vanishing point
-  const groundGrad = ctx.createRadialGradient(cx,cy,0,cx,cy,Math.min(W,H)*1.1);
-  groundGrad.addColorStop(0,'rgba(180,190,180,0.55)');
-  groundGrad.addColorStop(0.2,'rgba(140,155,140,0.45)');
-  groundGrad.addColorStop(0.5,'rgba(90,105,90,0.3)');
-  groundGrad.addColorStop(1,'rgba(40,50,60,0)');
-  ctx.fillStyle=groundGrad;
-  ctx.beginPath();
-  ctx.ellipse(cx,cy, Math.min(W,H)*1.1, Math.min(W,H)*0.62, 0,0,Math.PI*2);
-  ctx.fill();
-
-  // ── Draw roads ──
-  ctx.save();
-  ctx.globalAlpha=0.18;
-  ctx.strokeStyle='#f0ead0';
-  ctx.lineWidth=1.2;
-  for(const road of ROADS){
-    if(road.radial){
-      // radial lines from center outward
-      const bx=Math.cos(road.angle)*3000, bz=Math.sin(road.angle)*3000;
-      const p0=project(0,0,828);
-      const p1=project(bx,bz,828);
-      ctx.beginPath();
-      ctx.moveTo(p0.sx,p0.sy);
-      ctx.lineTo(p1.sx,p1.sy);
-      ctx.stroke();
+  // ── Road network ──
+  for(const r of cityRoads){
+    const sx=wx2s(r.x), sy=wy2s(r.y), sw=ws2s(r.w), sh=ws2s(r.h);
+    if(sx>W+50||sx+sw<-50||sy>H+50||sy+sh<-50) continue;
+    // Tarmac
+    ctx.fillStyle='#2c2c2a';
+    ctx.fillRect(sx,sy,sw,sh);
+    // Lane markings
+    ctx.strokeStyle='rgba(255,255,230,0.18)';
+    ctx.lineWidth=Math.max(0.5,ws2s(1));
+    ctx.setLineDash([ws2s(12),ws2s(10)]);
+    if(r.horiz){
+      const midY=sy+sh/2;
+      ctx.beginPath(); ctx.moveTo(sx,midY); ctx.lineTo(sx+sw,midY); ctx.stroke();
+      // Kerb lines
+      ctx.setLineDash([]);
+      ctx.strokeStyle='rgba(255,255,200,0.1)';
+      ctx.beginPath(); ctx.moveTo(sx,sy); ctx.lineTo(sx+sw,sy); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(sx,sy+sh); ctx.lineTo(sx+sw,sy+sh); ctx.stroke();
     } else {
-      // concentric ring roads
-      ctx.beginPath();
-      for(let a=0;a<=Math.PI*2;a+=0.12){
-        const bx=Math.cos(a)*road.r, bz=Math.sin(a)*road.r;
-        const p=project(bx,bz,828);
-        if(a===0) ctx.moveTo(p.sx,p.sy); else ctx.lineTo(p.sx,p.sy);
-      }
-      ctx.closePath();
-      ctx.stroke();
+      const midX=sx+sw/2;
+      ctx.beginPath(); ctx.moveTo(midX,sy); ctx.lineTo(midX,sy+sh); ctx.stroke();
+      ctx.setLineDash([]);
+      ctx.strokeStyle='rgba(255,255,200,0.1)';
+      ctx.beginPath(); ctx.moveTo(sx,sy); ctx.lineTo(sx,sy+sh); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(sx+sw,sy); ctx.lineTo(sx+sw,sy+sh); ctx.stroke();
     }
-  }
-  ctx.restore();
+    ctx.setLineDash([]);
 
-  // ── Draw buildings (sorted back to front) ──
-  // Sort by dist desc so closer ones overdraw
-  const sorted=[...buildings].sort((a,b)=>b.dist-a.dist);
-
-  for(const b of sorted){
-    const wx=Math.cos(b.angle)*b.dist;
-    const wz=Math.sin(b.angle)*b.dist;
-
-    const ALTITUDE=828;
-    const p=project(wx,wz,ALTITUDE);
-
-    if(p.sx<-200||p.sx>W+200||p.sy<-200||p.sy>H+200) continue;
-
-    const scaledW=b.width*p.scale*0.0016;
-    const scaledD=b.depth*p.scale*0.0016;
-    const scaledH=b.height*p.scale*0.0016*0.4; // height perspective
-
-    if(scaledW<1.5) continue;
-
-    // Top face (roof) — flat from above
-    ctx.fillStyle=`hsl(${b.hue},18%,${28+b.height*0.04}%)`;
-    ctx.fillRect(p.sx-scaledW/2, p.sy-scaledD/2, scaledW, scaledD);
-
-    // Side faces give 3D illusion
-    // Left shadow face
-    ctx.fillStyle=`hsla(${b.hue},15%,15%,0.55)`;
-    ctx.beginPath();
-    ctx.moveTo(p.sx-scaledW/2, p.sy+scaledD/2);
-    ctx.lineTo(p.sx-scaledW/2, p.sy+scaledD/2+scaledH);
-    ctx.lineTo(p.sx+scaledW/2, p.sy+scaledD/2+scaledH);
-    ctx.lineTo(p.sx+scaledW/2, p.sy+scaledD/2);
-    ctx.fill();
-
-    // Windows glow on lit buildings
-    if(b.lit && scaledW>4){
-      ctx.globalAlpha=0.35;
-      ctx.fillStyle=b.litCol;
-      const cols=Math.max(1,Math.floor(scaledW/3));
-      const rows=Math.max(1,Math.floor(scaledD/3));
-      for(let r=0;r<rows;r++) for(let cc=0;cc<cols;cc++){
-        if(Math.random()<0.55){
-          ctx.fillRect(
-            p.sx-scaledW/2+cc*(scaledW/cols)+0.5,
-            p.sy-scaledD/2+r*(scaledD/rows)+0.5,
-            scaledW/cols-0.8, scaledD/rows-0.8
-          );
+    // Zebra crossings at intersections
+    if(r.horiz){
+      for(let c=0;c<=GRID_COLS;c++){
+        const hw=WORLD/2;
+        const ix=wx2s(-hw+c*(BLOCK_W+ROAD_W));
+        ctx.fillStyle='rgba(255,255,230,0.12)';
+        const zw=ws2s(ROAD_W*0.9), zh=ws2s(3);
+        for(let z=0;z<5;z++){
+          ctx.fillRect(ix+ws2s(1), sy+z*zh*2.2, zw, zh);
         }
       }
-      ctx.globalAlpha=1;
     }
   }
 
-  // ── Dubai haze / smog layer ──
-  const hazeGrad=ctx.createRadialGradient(cx,cy+H*.05,0,cx,cy,H*.7);
-  hazeGrad.addColorStop(0,'rgba(210,200,175,0.0)');
-  hazeGrad.addColorStop(0.5,'rgba(180,170,140,0.12)');
-  hazeGrad.addColorStop(1,'rgba(150,140,110,0.35)');
-  ctx.fillStyle=hazeGrad;
-  ctx.fillRect(0,0,W,H);
-
-  // ── Wind streaks ──
-  drawWindParticles();
-
-  // ── Spire / platform ──
-  drawSpire();
-
-  // ── Vignette (darkness at edges for vertigo) ──
-  const vig=ctx.createRadialGradient(W/2,H/2,H*.2,W/2,H/2,Math.max(W,H)*.78);
-  vig.addColorStop(0,'rgba(0,0,0,0)');
-  vig.addColorStop(1,'rgba(0,0,0,0.72)');
-  ctx.fillStyle=vig;
-  ctx.fillRect(0,0,W,H);
-
-  // ── Fall animation overlay ──
-  if(fallAnim>0){
-    ctx.fillStyle=`rgba(0,0,0,${Math.min(1,fallAnim*0.035)})`;
-    ctx.fillRect(0,0,W,H);
-    // zoom rush effect
-    const zoomGrad=ctx.createRadialGradient(W/2,H/2,0,W/2,H/2,W*.5);
-    zoomGrad.addColorStop(0,'rgba(255,255,255,0)');
-    zoomGrad.addColorStop(1,`rgba(255,255,255,${Math.min(.15,fallAnim*.003)})`);
-    ctx.fillStyle=zoomGrad;
-    ctx.fillRect(0,0,W,H);
-  }
-}
-
-function drawSpire(){
-  const cx = W/2 + camLeanX*W*0.18;
-  const cy = H/2 + camLeanY*H*0.18;
-  const lean = Math.sqrt(camLeanX*camLeanX + camLeanY*camLeanY);
-
-  // ── How far down the building structure extends below us ──
-  // The Burj Khalifa tapers in a series of setback tiers as you
-  // look down. We render them foreshortened — biggest at bottom,
-  // converging toward us at top.
-  const totalDepth = H * 1.05;   // how far down the structure goes
-
-  // Tier definitions: { yFrac (0=us, 1=bottom), halfW, halfD, alpha }
-  // Modelled on Burj Khalifa's actual stepped cross-section
-  const tiers = [
-    { y:1.00, hw:0.310, hd:0.220, col:'#5a6a5a' },  // base / podium
-    { y:0.88, hw:0.220, hd:0.155, col:'#6a7a6a' },
-    { y:0.74, hw:0.165, hd:0.115, col:'#788878' },
-    { y:0.60, hw:0.120, hd:0.085, col:'#8090a0' },
-    { y:0.47, hw:0.088, hd:0.062, col:'#8898a8' },
-    { y:0.35, hw:0.062, hd:0.044, col:'#90a0b0' },
-    { y:0.24, hw:0.042, hd:0.030, col:'#98a8b8' },
-    { y:0.15, hw:0.026, hd:0.019, col:'#a0b0c0' },
-    { y:0.08, hw:0.015, hd:0.011, col:'#b0bec8' },
-    { y:0.03, hw:0.007, hd:0.005, col:'#c0ccd4' },
-  ];
-
-  ctx.save();
-
-  // ── Draw tiers back-to-front (bottom first) ──
-  for(let i=0; i<tiers.length; i++){
-    const t  = tiers[i];
-    const t2 = tiers[i+1] || { y:0, hw:0.003, hd:0.002 };
-
-    const y1 = cy + t.y  * totalDepth;
-    const y2 = cy + t2.y * totalDepth;
-
-    const w1 = t.hw  * W * 2;
-    const w2 = t2.hw * W * 2;
-    const d1 = t.hd  * W * 2;
-    const d2 = t2.hd * W * 2;
-
-    // Only draw if on screen
-    if(y1 < -50) continue;
-
-    // ── Top face of this tier (flat roof looking down) ──
-    // Trapezoidal shape: narrower at top (closer to us), wider at bottom
-    const roofGrad = ctx.createLinearGradient(cx, y2, cx, y1);
-    roofGrad.addColorStop(0, t.col);
-    roofGrad.addColorStop(1, shadeColStr(t.col, -18));
-    ctx.fillStyle = roofGrad;
-    ctx.beginPath();
-    ctx.moveTo(cx - w2/2, y1);
-    ctx.lineTo(cx + w2/2, y1);
-    ctx.lineTo(cx + w1/2, y2);  // wait — bottom is WIDER (further away = more perspective)
-    ctx.lineTo(cx - w1/2, y2);
-    ctx.closePath();
-    ctx.fill();
-
-    // ── Setback edge — the ledge between tiers ──
-    if(i < tiers.length-1){
-      const ledgeH = Math.max(2, (y1-y2)*0.04);
-      ctx.fillStyle = shadeColStr(t.col, 20);
-      ctx.fillRect(cx - w2/2, y1 - ledgeH, w2, ledgeH);
+  // ── Pavement / sidewalks ──
+  for(const r of cityRoads){
+    const sx=wx2s(r.x), sy=wy2s(r.y), sw=ws2s(r.w), sh=ws2s(r.h);
+    if(sx>W+20||sx+sw<-20||sy>H+20||sy+sh<-20) continue;
+    ctx.fillStyle='rgba(160,155,140,0.22)';
+    if(r.horiz){
+      ctx.fillRect(sx, sy-ws2s(4), sw, ws2s(4));
+      ctx.fillRect(sx, sy+sh,      sw, ws2s(4));
+    } else {
+      ctx.fillRect(sx-ws2s(4), sy, ws2s(4), sh);
+      ctx.fillRect(sx+sw,      sy, ws2s(4), sh);
     }
+  }
 
-    // ── Window grid on each tier face ──
-    if(w2 > 8 && y1-y2 > 6){
-      ctx.save();
-      ctx.globalAlpha = 0.22;
-      const cols = Math.max(2, Math.floor(w2/14));
-      const rows = Math.max(1, Math.floor((y1-y2)/10));
-      for(let r=0;r<rows;r++){
-        for(let c=0;c<cols;c++){
-          const wx = cx - w2/2 + (c+0.5)*(w2/cols);
-          const wy = y2 + (r+0.5)*((y1-y2)/rows);
-          const ww = w2/cols * 0.55;
-          const wh = (y1-y2)/rows * 0.55;
-          // window colour shifts: blue glass
-          ctx.fillStyle = `hsl(210,${30+r*5}%,${55+c*3}%)`;
-          ctx.fillRect(wx-ww/2, wy-wh/2, ww, wh);
-        }
+  // ── Trees (tiny green circles along pavements) ──
+  for(const t of cityTrees){
+    const sx=wx2s(t.x), sy=wy2s(t.y), sr=ws2s(t.r);
+    if(sr<0.8) continue;
+    ctx.fillStyle='#3a6a30';
+    ctx.beginPath(); ctx.arc(sx,sy,sr,0,Math.PI*2); ctx.fill();
+    ctx.fillStyle='rgba(80,140,60,0.5)';
+    ctx.beginPath(); ctx.arc(sx-sr*.2,sy-sr*.2,sr*.6,0,Math.PI*2); ctx.fill();
+  }
+
+  // ── Buildings ──
+  for(const b of cityBlocks){
+    const sx=wx2s(b.x), sy=wy2s(b.y), sw=ws2s(b.w), sh=ws2s(b.h);
+    if(sx>W+10||sx+sw<-10||sy>H+10||sy+sh<-10) continue;
+
+    // Building footprint
+    ctx.fillStyle=b.col;
+    ctx.fillRect(sx,sy,sw,sh);
+
+    // Roof colour / surface
+    ctx.fillStyle=b.roofCol;
+    const roofInset=ws2s(2);
+    if(sw>roofInset*2 && sh>roofInset*2)
+      ctx.fillRect(sx+roofInset, sy+roofInset, sw-roofInset*2, sh-roofInset*2);
+
+    // Shadow edge (south + east faces)
+    ctx.fillStyle='rgba(0,0,0,0.28)';
+    const sh2=Math.max(1,ws2s(3));
+    ctx.fillRect(sx,      sy+sh-sh2, sw, sh2);  // south edge
+    ctx.fillRect(sx+sw-sh2, sy,      sh2, sh);  // east edge
+
+    // Highlight (north + west)
+    ctx.fillStyle='rgba(255,255,255,0.06)';
+    ctx.fillRect(sx, sy, sw, Math.max(1,ws2s(2)));
+    ctx.fillRect(sx, sy, Math.max(1,ws2s(2)), sh);
+
+    // AC units on roof
+    if(b.hasAC && sw>ws2s(20)){
+      ctx.fillStyle='rgba(140,140,140,0.7)';
+      const acs = Math.min(4, Math.floor(sw/ws2s(18)));
+      for(let i=0;i<acs;i++){
+        const ax=sx+sw*.15+i*(sw*.7/acs), ay=sy+sh*.2;
+        const aw=ws2s(8), ah=ws2s(5);
+        ctx.fillRect(ax,ay,aw,ah);
       }
-      ctx.restore();
     }
 
-    // ── Left + right side faces (shadow) ──
-    ctx.fillStyle = `rgba(0,0,0,0.28)`;
-    // Left face
-    ctx.beginPath();
-    ctx.moveTo(cx - w2/2, y1);
-    ctx.lineTo(cx - w1/2, y2);
-    ctx.lineTo(cx - w1/2 + 3, y2);
-    ctx.lineTo(cx - w2/2 + 3, y1);
-    ctx.closePath();
-    ctx.fill();
-    // Right face (highlight)
-    ctx.fillStyle = `rgba(255,255,255,0.08)`;
-    ctx.beginPath();
-    ctx.moveTo(cx + w2/2, y1);
-    ctx.lineTo(cx + w1/2, y2);
-    ctx.lineTo(cx + w1/2 - 3, y2);
-    ctx.lineTo(cx + w2/2 - 3, y1);
-    ctx.closePath();
-    ctx.fill();
+    // Helipad
+    if(b.hasPad && sw>ws2s(30)){
+      const hx=sx+sw/2, hy=sy+sh/2, hr=Math.min(sw,sh)*0.28;
+      ctx.strokeStyle='rgba(255,220,60,0.5)';
+      ctx.lineWidth=Math.max(1,ws2s(1.5));
+      ctx.beginPath(); ctx.arc(hx,hy,hr,0,Math.PI*2); ctx.stroke();
+      ctx.fillStyle='rgba(255,220,60,0.35)';
+      ctx.font=`bold ${Math.max(6,ws2s(14))}px sans-serif`;
+      ctx.textAlign='center'; ctx.textBaseline='middle';
+      ctx.fillText('H',hx,hy);
+    }
   }
 
-  // ── Central needle / antenna going down ──
-  const needleW = 3.5;
-  const needleBot = cy + totalDepth * 1.02;
-  const needleGrad = ctx.createLinearGradient(0, cy, 0, needleBot);
-  needleGrad.addColorStop(0,   '#d8dde2');
-  needleGrad.addColorStop(0.15,'#a8b0b8');
-  needleGrad.addColorStop(0.5, '#7a8490');
-  needleGrad.addColorStop(1,   'rgba(60,70,80,0)');
-  ctx.fillStyle = needleGrad;
-  ctx.beginPath();
-  ctx.moveTo(cx - needleW, cy);
-  ctx.lineTo(cx + needleW, cy);
-  ctx.lineTo(cx + needleW*0.3, needleBot);
-  ctx.lineTo(cx - needleW*0.3, needleBot);
-  ctx.fill();
+  // ── Pools ──
+  for(const p of cityPools){
+    const sx=wx2s(p.cx), sy=wy2s(p.cy);
+    const srw=ws2s(p.rw), srh=ws2s(p.rh);
+    ctx.fillStyle='rgba(40,140,200,0.75)';
+    ctx.beginPath(); ctx.ellipse(sx,sy,srw,srh,0,0,Math.PI*2); ctx.fill();
+    ctx.strokeStyle='rgba(80,180,240,0.5)';
+    ctx.lineWidth=.5; ctx.stroke();
+  }
 
-  // Needle centre line highlight
-  ctx.strokeStyle = 'rgba(255,255,255,0.25)';
-  ctx.lineWidth = 0.8;
-  ctx.beginPath();
-  ctx.moveTo(cx, cy);
-  ctx.lineTo(cx, needleBot * 0.6);
-  ctx.stroke();
-
-  // ── Observation deck rings ──
-  const deckPositions = [0.15, 0.35, 0.55];
-  for(const dp of deckPositions){
-    const dy = cy + dp * totalDepth;
-    const dtier = tiers.find(t=>t.y>=dp) || tiers[tiers.length-1];
-    const dw = dtier.hw * W * 1.9;
+  // ── Cars ──
+  for(const car of cityCars){
+    const sx=wx2s(car.x), sy=wy2s(car.y);
+    const sl=ws2s(car.len), sw2=ws2s(car.wid);
+    if(sl<1) continue;
     ctx.save();
-    ctx.globalAlpha = 0.55;
-    ctx.strokeStyle = '#c8d0d8';
-    ctx.lineWidth = 1.5;
-    ctx.beginPath();
-    ctx.ellipse(cx, dy, dw/2, dw*0.08, 0, 0, Math.PI*2);
-    ctx.stroke();
+    ctx.translate(sx,sy); ctx.rotate(car.angle);
+    ctx.fillStyle=car.col;
+    ctx.fillRect(-sl/2,-sw2/2,sl,sw2);
+    // Windscreen glint
+    ctx.fillStyle='rgba(160,200,240,0.45)';
+    ctx.fillRect(-sl/2+sl*.55,-sw2/2+sw2*.15,sl*.3,sw2*.7);
+    // Rear lights
+    ctx.fillStyle='rgba(220,60,60,0.8)';
+    ctx.fillRect(-sl/2, -sw2/2+sw2*.1, sl*.12, sw2*.35);
+    ctx.fillRect(-sl/2, -sw2/2+sw2*.55, sl*.12, sw2*.35);
     ctx.restore();
   }
 
-  // ── Platform at very top (where player stands) ──
-  const tipR = 16 + lean * 7;
-  ctx.save();
-  ctx.translate(cx, cy);
-  ctx.rotate(camLeanX * 0.12);
+  // ── Parking lots ──
+  for(const pk of cityParking){
+    const sx=wx2s(pk.x), sy=wy2s(pk.y), sw=ws2s(pk.w), sh=ws2s(pk.h);
+    ctx.fillStyle='rgba(50,50,46,0.7)';
+    ctx.fillRect(sx,sy,sw,sh);
+    ctx.strokeStyle='rgba(255,255,200,0.12)';
+    ctx.lineWidth=.7;
+    const nLines=Math.max(1,Math.floor(ws2s(pk.w)/ws2s(12)));
+    for(let i=1;i<nLines;i++){
+      const lx=sx+i*(sw/nLines);
+      ctx.beginPath(); ctx.moveTo(lx,sy); ctx.lineTo(lx,sy+sh); ctx.stroke();
+    }
+  }
+}
 
-  // Platform drop shadow
-  ctx.fillStyle = 'rgba(0,0,0,0.3)';
+function drawGround(){
+  // The whole view is the city
+  drawCity();
+}
+
+// Slight perspective warp: apply canvas transform based on lean
+// This tilts the "floor" away from us on the lean side
+function applyLeanTransform(){
+  const lx = panX/FALL_DIST, ly = panY/FALL_DIST;
+  const tiltAngle = Math.sqrt(lx*lx+ly*ly)*0.18; // max ~10°
+  const axis = Math.atan2(ly, lx);
+
+  ctx.save();
+  ctx.translate(W/2, H/2);
+  // Very subtle scale skew to give tilt feeling
+  const sx = 1 + Math.abs(lx)*0.12;
+  const sy = 1 + Math.abs(ly)*0.12;
+  ctx.scale(sx, sy);
+  ctx.translate(-W/2+lx*W*0.04, -H/2+ly*H*0.04);
+}
+
+// ─────────────────────────────────────────────────────────────
+//  PERSON'S FEET / LEGS  (what you see when looking straight down)
+// ─────────────────────────────────────────────────────────────
+function drawFeet(){
+  const cx=W/2, cy=H/2;
+
+  // Tiny spire tip platform right at centre
+  const pr = Math.max(14, Math.min(W,H)*0.025);
+
+  // Cast shadow of platform
+  ctx.fillStyle='rgba(0,0,0,0.22)';
   ctx.beginPath();
-  ctx.ellipse(3, 5, tipR*1.15, tipR*0.32, 0, 0, Math.PI*2);
+  ctx.ellipse(cx+pr*.3, cy+pr*.4, pr*1.3, pr*.4, 0, 0, Math.PI*2);
   ctx.fill();
 
-  // Platform surface — small octagonal metal pad
-  const platGrad = ctx.createRadialGradient(-tipR*.25, -tipR*.25, 0, 0, 0, tipR*1.3);
-  platGrad.addColorStop(0,   '#e8eaec');
-  platGrad.addColorStop(0.4, '#b8bec4');
-  platGrad.addColorStop(1,   '#6a7278');
-  ctx.fillStyle = platGrad;
-  // Octagon
+  // Platform — small octagonal metal disc
+  const platGrad = ctx.createRadialGradient(cx-pr*.2,cy-pr*.2,0,cx,cy,pr*1.2);
+  platGrad.addColorStop(0,'#d8dadc');
+  platGrad.addColorStop(.5,'#9ca0a4');
+  platGrad.addColorStop(1,'#5a5e62');
+  ctx.fillStyle=platGrad;
   ctx.beginPath();
   for(let i=0;i<8;i++){
-    const a = (i/8)*Math.PI*2 - Math.PI/8;
-    const px = Math.cos(a)*tipR, py = Math.sin(a)*tipR*0.36;
-    i===0 ? ctx.moveTo(px,py) : ctx.lineTo(px,py);
+    const a=i/8*Math.PI*2-Math.PI/8;
+    i===0?ctx.moveTo(cx+Math.cos(a)*pr,cy+Math.sin(a)*pr*.38)
+         :ctx.lineTo(cx+Math.cos(a)*pr,cy+Math.sin(a)*pr*.38);
   }
   ctx.closePath();
   ctx.fill();
 
-  // Grip lines on platform
-  ctx.strokeStyle = 'rgba(255,255,255,0.18)';
-  ctx.lineWidth = 0.6;
+  // Grip lines
+  ctx.strokeStyle='rgba(255,255,255,.2)'; ctx.lineWidth=.6;
   for(let i=-2;i<=2;i++){
     ctx.beginPath();
-    ctx.moveTo(i*(tipR/2.5) - tipR*0.5, -tipR*0.12);
-    ctx.lineTo(i*(tipR/2.5) + tipR*0.5,  tipR*0.12);
+    ctx.moveTo(cx+i*(pr/2.4)-pr*.4, cy-pr*.12);
+    ctx.lineTo(cx+i*(pr/2.4)+pr*.4, cy+pr*.12);
     ctx.stroke();
   }
 
-  // Safety rail hint (tiny)
-  ctx.strokeStyle = 'rgba(180,180,180,0.5)';
-  ctx.lineWidth = 1;
+  // Feet! — Two boot-shaped silhouettes looking straight down
+  // Left foot
+  ctx.save();
+  ctx.translate(cx - pr*.32, cy+pr*.05);
+  ctx.rotate(-0.12 + panX*.008);
+  drawBoot(pr*.38, 'left');
+  ctx.restore();
+
+  // Right foot
+  ctx.save();
+  ctx.translate(cx + pr*.32, cy+pr*.05);
+  ctx.rotate(0.12 + panX*.008);
+  drawBoot(pr*.38, 'right');
+  ctx.restore();
+
+  // Trouser cuffs above boots
+  ctx.fillStyle='rgba(30,35,45,0.9)';
   ctx.beginPath();
-  ctx.ellipse(0, 0, tipR*0.92, tipR*0.3, 0, 0, Math.PI*2);
+  ctx.ellipse(cx-pr*.32, cy-pr*.08, pr*.22, pr*.3, -0.12+panX*.008, 0, Math.PI*2);
+  ctx.fill();
+  ctx.beginPath();
+  ctx.ellipse(cx+pr*.32, cy-pr*.08, pr*.22, pr*.3,  0.12+panX*.008, 0, Math.PI*2);
+  ctx.fill();
+}
+
+function drawBoot(sz, side){
+  // Top-down boot: roughly oval with toe bump
+  const dir = side==='left' ? -1 : 1;
+  ctx.fillStyle='#1a1a18';
+  ctx.beginPath();
+  ctx.ellipse(0,0, sz*.5, sz*.85, 0, 0, Math.PI*2);
+  ctx.fill();
+  // Toe cap
+  ctx.fillStyle='#2a2a28';
+  ctx.beginPath();
+  ctx.ellipse(dir*sz*.1, sz*.5, sz*.42, sz*.32, 0.1*dir, 0, Math.PI*2);
+  ctx.fill();
+  // Sole edge highlight
+  ctx.strokeStyle='rgba(90,85,75,0.6)'; ctx.lineWidth=sz*.06;
+  ctx.beginPath();
+  ctx.ellipse(0,0, sz*.52, sz*.87, 0, 0, Math.PI*2);
   ctx.stroke();
+  // Lace dots
+  ctx.fillStyle='rgba(150,140,120,0.5)';
+  for(let i=0;i<3;i++){
+    ctx.beginPath();
+    ctx.arc(0, -sz*.15+i*sz*.18, sz*.055, 0, Math.PI*2);
+    ctx.fill();
+  }
+}
 
-  // ── Player figure (top-down) ──
-  ctx.translate(camLeanX*tipR*0.45, camLeanY*tipR*0.2);
+// ─────────────────────────────────────────────────────────────
+//  HEIGHT FOG  — fades edges for that deep vertigo look
+// ─────────────────────────────────────────────────────────────
+function drawAtmosphere(){
+  // Radial blur vignette
+  const vig=ctx.createRadialGradient(W/2,H/2,Math.min(W,H)*.22,W/2,H/2,Math.min(W,H)*.75);
+  vig.addColorStop(0,'rgba(0,0,0,0)');
+  vig.addColorStop(.7,'rgba(0,0,0,0.15)');
+  vig.addColorStop(1,'rgba(0,0,0,0.72)');
+  ctx.fillStyle=vig; ctx.fillRect(0,0,W,H);
 
-  // Body shadow
-  ctx.fillStyle = 'rgba(0,0,0,0.38)';
-  ctx.beginPath();
-  ctx.ellipse(2, 4, 8, 3, 0, 0, Math.PI*2);
-  ctx.fill();
+  // Height haze: desaturates centre (things far below are hazy)
+  const haze=ctx.createRadialGradient(W/2,H/2,0,W/2,H/2,Math.min(W,H)*.52);
+  haze.addColorStop(0,'rgba(200,210,220,0.10)');
+  haze.addColorStop(.45,'rgba(180,195,210,0.06)');
+  haze.addColorStop(1,'rgba(160,175,195,0)');
+  ctx.fillStyle=haze; ctx.fillRect(0,0,W,H);
+}
 
-  // Jacket / body (top-down: we see shoulders + back)
-  const bodyGrad = ctx.createRadialGradient(0, 3, 0, 0, 5, 12);
-  bodyGrad.addColorStop(0, '#4a5a7a');
-  bodyGrad.addColorStop(1, '#2a3a5a');
-  ctx.fillStyle = bodyGrad;
-  ctx.beginPath();
-  ctx.ellipse(0, 6, 9, 5.5, 0, 0, Math.PI);
-  ctx.fill();
+// ─────────────────────────────────────────────────────────────
+//  MAIN DRAW
+// ─────────────────────────────────────────────────────────────
+function draw(){
+  frame++;
+  ctx.clearRect(0,0,W,H);
 
-  // Head
-  const headGrad = ctx.createRadialGradient(-1.5, -1.5, 0, 0, 0, 7.5);
-  headGrad.addColorStop(0, '#f5d0a8');
-  headGrad.addColorStop(1, '#c8906a');
-  ctx.fillStyle = headGrad;
-  ctx.beginPath();
-  ctx.arc(0, 0, 6.8, 0, Math.PI*2);
-  ctx.fill();
-
-  // Hair
-  ctx.fillStyle = '#1a1008';
-  ctx.beginPath();
-  ctx.ellipse(0, -1.5, 5.5, 4.5, 0, 0, Math.PI);
-  ctx.fill();
-  ctx.beginPath();
-  ctx.ellipse(-5, 0, 2, 3.5, -0.3, 0, Math.PI);
-  ctx.fill();
-  ctx.beginPath();
-  ctx.ellipse( 5, 0, 2, 3.5,  0.3, 0, Math.PI);
-  ctx.fill();
-
-  ctx.restore();
+  // Apply lean-based canvas transform (subtle tilt of entire scene)
+  applyLeanTransform();
+  drawGround();
   ctx.restore();
 
-  // ── Fear pulse ──
-  if(lean > 0.5){
-    const pulse = 0.5 + 0.5*Math.sin(Date.now()*0.014);
-    ctx.fillStyle = `rgba(239,68,68,${(lean-0.5)*0.55*pulse})`;
+  drawStreaks();
+  drawAtmosphere();
+  drawFeet();
+
+  // Fear pulse
+  const danger=Math.sqrt(panX**2+panY**2)/FALL_DIST;
+  if(danger>0.5 && phase===PHASE_PLAY){
+    const pulse=0.5+0.5*Math.sin(Date.now()*.016);
+    ctx.fillStyle=`rgba(239,68,68,${(danger-.5)*0.65*pulse})`;
     ctx.fillRect(0,0,W,H);
   }
-}
 
-// helper: lighten/darken a css hsl colour string by offset
-function shadeColStr(col, offset){
-  // parse hex #rrggbb
-  const v=parseInt(col.replace('#',''),16);
-  const r=Math.min(255,Math.max(0,((v>>16)&0xff)+offset));
-  const g=Math.min(255,Math.max(0,((v>>8)&0xff)+offset));
-  const b=Math.min(255,Math.max(0,(v&0xff)+offset));
-  return `rgb(${r},${g},${b})`;
-}
-
-// ═══════════════════════════════════════════════════════════
-//  PHYSICS — balance model
-// ═══════════════════════════════════════════════════════════
-const LEAN_GRAVITY  = 0.0045;  // tilt pulls you further off-centre
-const LEAN_FRICTION = 0.975;   // inertia
-const LEAN_CORRECT  = 0.012;   // gyro correction strength
-const LEAN_WIND     = 0.0008;  // wind nudge
-const FALL_THRESH   = 1.0;     // lean magnitude before falling
-
-let lastTime=0;
-function physicsStep(dt){
-  if(!gameRunning) return;
-
-  // Wind pushes
-  camVX += windX * LEAN_WIND * dt * 60;
-  camVY += windY * LEAN_WIND * dt * 60;
-
-  // Tilt makes lean worse (leaning = unbalanced state compounds)
-  camVX += camLeanX * LEAN_GRAVITY * dt * 60;
-  camVY += camLeanY * LEAN_GRAVITY * dt * 60;
-
-  // Gyro input corrects lean
-  camVX -= tiltX * LEAN_CORRECT * dt * 60;
-  camVY -= tiltY * LEAN_CORRECT * dt * 60;
-
-  // Friction
-  camVX *= Math.pow(LEAN_FRICTION, dt*60);
-  camVY *= Math.pow(LEAN_FRICTION, dt*60);
-
-  camLeanX += camVX;
-  camLeanY += camVY;
-
-  // Update balance bars
-  const bx=Math.max(0,Math.min(100,50+camLeanX*45));
-  const by=Math.max(0,Math.min(100,50+camLeanY*45));
-  document.getElementById('barCursorX').style.left=bx+'%';
-  document.getElementById('barCursorY').style.left=by+'%';
-
-  // Colour bar by danger
-  const danger=Math.sqrt(camLeanX**2+camLeanY**2);
-  const barCol=danger<0.3?'#22c55e':danger<0.65?'#f59e0b':'#ef4444';
-  document.getElementById('barCursorX').style.background=barCol;
-  document.getElementById('barCursorY').style.background=barCol;
-
-  // Check fall
-  if(Math.sqrt(camLeanX**2+camLeanY**2)>FALL_THRESH){
-    triggerFall();
+  // Fall zoom
+  if(phase===PHASE_DEAD){
+    fallT = Math.min(1,(fallT||0)+0.025);
+    const zoom=1+fallT*0.4;
+    ctx.save();
+    ctx.translate(W/2,H/2); ctx.scale(zoom,zoom); ctx.translate(-W/2,-H/2);
+    ctx.fillStyle=`rgba(0,0,0,${fallT*.9})`;
+    ctx.fillRect(0,0,W,H);
+    ctx.restore();
   }
 }
 
-// ═══════════════════════════════════════════════════════════
-//  TIMER
-// ═══════════════════════════════════════════════════════════
-let survivalTimer=null;
-function startSurvivalTimer(){
+let fallT=0;
+
+// ─────────────────────────────────────────────────────────────
+//  CAR MOVEMENT
+// ─────────────────────────────────────────────────────────────
+function moveCars(dt){
+  const hw=WORLD/2;
+  for(const car of cityCars){
+    if(car.horiz){
+      car.x += car.spd * dt * 30;
+      if(car.x>hw+20)  car.x=-hw-20;
+      if(car.x<-hw-20) car.x=hw+20;
+    } else {
+      car.y += car.spd * dt * 30;
+      if(car.y>hw+20)  car.y=-hw-20;
+      if(car.y<-hw-20) car.y=hw+20;
+    }
+  }
+}
+
+// ─────────────────────────────────────────────────────────────
+//  GAME STATES
+// ─────────────────────────────────────────────────────────────
+let survived=0, bestTime=0, survivalTimer=null;
+
+// 5-second countdown + hold phase
+let cdStep=0, cdActive=false;
+const cdNums=[5,4,3,2,1];
+
+function startCountdown(){
+  cdStep=0; cdActive=true;
+  phase=PHASE_HOLD;
+  document.getElementById('holdBar').classList.add('show');
+  showCountdownNum();
+}
+
+function showCountdownNum(){
+  const el=document.getElementById('cdNum');
+  const msg=document.getElementById('cdMsg');
+
+  if(cdStep===0){
+    msg.style.opacity=1;
+    msg.textContent='HOLD ON TIGHT';
+  }
+
+  if(cdStep < cdNums.length){
+    el.textContent=cdNums[cdStep];
+    el.style.animation='none';
+    requestAnimationFrame(()=>{
+      requestAnimationFrame(()=>{
+        el.style.animation='cdPop .35s ease-out forwards';
+        el.style.opacity=1;
+      });
+    });
+    // fill hold bar
+    const pct=((cdStep+1)/cdNums.length)*100;
+    document.getElementById('holdFill').style.width=pct+'%';
+
+    cdStep++;
+    setTimeout(showCountdownNum, 1000);
+  } else {
+    // release!
+    el.textContent='GO';
+    el.style.animation='cdPop .3s ease-out forwards';
+    msg.textContent='YOU\'RE ON YOUR OWN';
+    msg.style.color='rgba(255,100,80,.7)';
+    document.getElementById('windHudVal').textContent='—';
+    setTimeout(()=>{
+      el.style.opacity=0; msg.style.opacity=0;
+      document.getElementById('holdBar').classList.remove('show');
+      releasePlayer();
+    },900);
+  }
+}
+
+function releasePlayer(){
+  phase=PHASE_PLAY;
+  cdActive=false;
   survived=0;
   clearInterval(survivalTimer);
   survivalTimer=setInterval(()=>{
-    if(!gameRunning) return;
+    if(phase!==PHASE_PLAY) return;
     survived++;
-    document.getElementById('timeDisplay').textContent=survived+'s';
-    // Wind gets stronger over time
-    if(survived%20===0){
-      windSpeed=Math.min(80,windSpeed+5);
-    }
+    document.getElementById('timeHud').textContent=survived+'s';
+    // wind escalates
+    if(survived>15) windTimer=99;
   },1000);
 }
 
-// ═══════════════════════════════════════════════════════════
-//  FALL
-// ═══════════════════════════════════════════════════════════
 function triggerFall(){
-  if(!gameRunning) return;
-  gameRunning=false;
+  if(phase===PHASE_DEAD) return;
+  phase=PHASE_DEAD;
   clearInterval(survivalTimer);
-  fallAnim=1;
   if(survived>bestTime) bestTime=survived;
-
-  // animate the fall for a second then show overlay
-  const fallLoop=setInterval(()=>{
-    fallAnim++;
-    if(fallAnim>40){
-      clearInterval(fallLoop);
-      showGameOver();
-    }
-  },40);
+  fallT=0;
+  setTimeout(showGameOver, 1400);
 }
 
 function showGameOver(){
-  document.getElementById('overBig').textContent='YOU FELL';
-  document.getElementById('overSub').textContent='828 metres straight down';
-  document.getElementById('overScore').textContent=survived+'s — Best: '+bestTime+'s';
+  document.getElementById('oScr').textContent=survived+'s  —  best: '+bestTime+'s';
   document.getElementById('overlay').classList.add('show');
 }
 
-// ═══════════════════════════════════════════════════════════
-//  MAIN LOOP
-// ═══════════════════════════════════════════════════════════
-let animId=null;
-function gameLoop(ts){
-  const dt=Math.min(0.05,(ts-lastTime)/1000||0.016);
-  lastTime=ts;
+function restart(){
+  document.getElementById('overlay').classList.remove('show');
+  panX=0; panY=0; pvX=0; pvY=0;
+  tiltX=0; tiltY=0; windX=0; windY=0;
+  windKph=0; windTimer=0; fallT=0;
+  document.getElementById('timeHud').textContent='0s';
+  document.getElementById('windHudVal').textContent='—';
+  document.getElementById('cdMsg').style.color='rgba(255,255,255,.45)';
+  startCountdown();
+}
 
+document.getElementById('retryBtn').addEventListener('click', restart);
+
+// ─────────────────────────────────────────────────────────────
+//  MAIN LOOP
+// ─────────────────────────────────────────────────────────────
+let lastTs=0, animId=null;
+function loop(ts){
+  const dt=Math.min(.05,(ts-lastTs)/1000||.016);
+  lastTs=ts;
+  applyKeyboard();
   updateWind(dt);
-  updateWindParticles();
+  updateStreaks();
+  moveCars(dt);
   physicsStep(dt);
   draw();
-
-  animId=requestAnimationFrame(gameLoop);
+  animId=requestAnimationFrame(loop);
 }
 
-// ═══════════════════════════════════════════════════════════
-//  GYROSCOPE
-// ═══════════════════════════════════════════════════════════
+// ─────────────────────────────────────────────────────────────
+//  INPUT
+// ─────────────────────────────────────────────────────────────
 function attachGyro(){
   window.addEventListener('deviceorientation',e=>{
-    tiltX=Math.max(-1,Math.min(1,(e.gamma||0)/30));
-    tiltY=Math.max(-1,Math.min(1,((e.beta||0)-15)/30));
+    tiltX=Math.max(-1,Math.min(1,(e.gamma||0)/28));
+    tiltY=Math.max(-1,Math.min(1,((e.beta||0)-15)/28));
   },true);
-  gyroEnabled=true;
+  gyroOn=true;
 }
 
-// Keyboard fallback
 const keys={};
 window.addEventListener('keydown',e=>keys[e.key]=true);
 window.addEventListener('keyup',  e=>keys[e.key]=false);
 function applyKeyboard(){
-  if(gyroEnabled) return;
-  if(keys['ArrowLeft'] ||keys['a']) tiltX=-.7;
-  else if(keys['ArrowRight']||keys['d']) tiltX=.7;
-  else tiltX=0;
-  if(keys['ArrowUp']||keys['w']) tiltY=-.7;
-  else if(keys['ArrowDown']||keys['s']) tiltY=.7;
-  else tiltY=0;
+  if(gyroOn) return;
+  if     (keys['ArrowLeft'] ||keys['a']) tiltX=Math.max(-1,tiltX-.15);
+  else if(keys['ArrowRight']||keys['d']) tiltX=Math.min( 1,tiltX+.15);
+  else tiltX*=.8;
+  if     (keys['ArrowUp']   ||keys['w']) tiltY=Math.max(-1,tiltY-.15);
+  else if(keys['ArrowDown'] ||keys['s']) tiltY=Math.min( 1,tiltY+.15);
+  else tiltY*=.8;
 }
 
-// ═══════════════════════════════════════════════════════════
-//  START / RESTART
-// ═══════════════════════════════════════════════════════════
+// ─────────────────────────────────────────────────────────────
+//  BOOT SEQUENCE
+// ─────────────────────────────────────────────────────────────
 function beginGame(){
-  document.getElementById('splash').style.opacity='0';
-  setTimeout(()=>document.getElementById('splash').style.display='none',500);
-  camLeanX=0; camLeanY=0; camVX=0; camVY=0;
-  tiltX=0; tiltY=0; fallAnim=0;
-  windX=0; windY=0; windSpeed=12;
-  gameRunning=true;
-  startSurvivalTimer();
-  cancelAnimationFrame(animId);
-  animId=requestAnimationFrame(gameLoop);
+  const sp=document.getElementById('splash');
+  sp.style.opacity='0';
+  setTimeout(()=>sp.style.display='none',700);
+  panX=0; panY=0; pvX=0; pvY=0; fallT=0;
+  animId=requestAnimationFrame(loop);
+  setTimeout(startCountdown, 800);
 }
-
-function restartGame(){
-  document.getElementById('overlay').classList.remove('show');
-  camLeanX=0; camLeanY=0; camVX=0; camVY=0;
-  tiltX=0; tiltY=0; fallAnim=0;
-  windX=0; windY=0; windSpeed=12;
-  gameRunning=true;
-  startSurvivalTimer();
-}
-
-document.getElementById('retryBtn').addEventListener('click',restartGame);
 
 function requestGyroPermission(){
   if(typeof DeviceOrientationEvent!=='undefined'&&
@@ -873,17 +1010,17 @@ function requestGyroPermission(){
 
 document.getElementById('startBtn').addEventListener('click',()=>{
   if(typeof DeviceOrientationEvent!=='undefined'&&
-     typeof DeviceOrientationEvent.requestPermission==='function'){
+     typeof DeviceOrientationEvent.requestPermission==='function')
     document.getElementById('permBanner').classList.add('show');
-  } else { requestGyroPermission(); }
+  else requestGyroPermission();
 });
 document.getElementById('permBtn').addEventListener('click',()=>{
   document.getElementById('permBanner').classList.remove('show');
   requestGyroPermission();
 });
 
-// Pre-render loop even on splash for atmosphere
-animId=requestAnimationFrame(gameLoop);
+// Run draw loop even on splash
+animId=requestAnimationFrame(loop);
 </script>
 </body>
 </html>
