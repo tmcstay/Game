@@ -1,704 +1,475 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
-<title>EVENT HORIZON</title>
-<style>
-@import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Space+Mono:wght@400;700&display=swap');
-*{margin:0;padding:0;box-sizing:border-box;}
-html,body{width:100%;height:100%;overflow:hidden;background:#000;touch-action:none;}
-canvas{position:fixed;inset:0;display:block;}
-
-#splash{
-  position:fixed;inset:0;z-index:100;background:#000;
-  display:flex;flex-direction:column;align-items:center;justify-content:center;
-  transition:opacity .8s;
-}
-#splash h1{
-  font-family:'Bebas Neue',sans-serif;
-  font-size:clamp(3.5rem,18vw,7.5rem);
-  letter-spacing:.18em;color:#fff;
-  text-shadow:0 0 60px rgba(120,80,255,.5),0 0 120px rgba(80,40,200,.25);
-  margin-bottom:.1em;
-}
-#splash .sub{
-  font-family:'Space Mono',monospace;font-size:clamp(.55rem,2.2vw,.78rem);
-  letter-spacing:.22em;color:rgba(255,255,255,.28);text-transform:uppercase;
-  margin-bottom:3.5rem;
-}
-#startBtn{
-  font-family:'Bebas Neue',sans-serif;font-size:clamp(1rem,4vw,1.35rem);
-  letter-spacing:.3em;padding:14px 50px;
-  border:1px solid rgba(120,80,255,.4);border-radius:1px;
-  background:rgba(120,80,255,.08);color:#fff;cursor:pointer;
-  box-shadow:0 0 40px rgba(120,80,255,.15);-webkit-appearance:none;
-  transition:background .2s;
-}
-#startBtn:active{background:rgba(120,80,255,.22);}
-
-#permBanner{
-  position:fixed;inset:0;z-index:200;background:#000;
-  display:none;flex-direction:column;align-items:center;justify-content:center;
-  text-align:center;padding:2rem;
-}
-#permBanner.show{display:flex;}
-#permBanner h2{font-family:'Bebas Neue',sans-serif;font-size:2.2rem;
-  letter-spacing:.15em;color:#fff;margin-bottom:.6rem;}
-#permBanner p{font-family:'Space Mono',monospace;font-size:.7rem;
-  letter-spacing:.1em;color:rgba(255,255,255,.38);margin-bottom:2.5rem;
-  max-width:260px;line-height:2;}
-#permBtn{font-family:'Bebas Neue',sans-serif;font-size:1.25rem;letter-spacing:.25em;
-  padding:13px 46px;border:1px solid rgba(120,80,255,.4);border-radius:1px;
-  background:rgba(120,80,255,.08);color:#fff;cursor:pointer;}
-
-/* calibration */
-#calibScreen{
-  position:fixed;inset:0;z-index:150;background:#000;
-  display:none;flex-direction:column;align-items:center;justify-content:center;
-  text-align:center;padding:2rem;
-}
-#calibScreen.show{display:flex;}
-#calibScreen h2{font-family:'Bebas Neue',sans-serif;font-size:2rem;
-  letter-spacing:.15em;color:#fff;margin-bottom:.5rem;}
-#calibScreen p{font-family:'Space Mono',monospace;font-size:.65rem;
-  letter-spacing:.1em;color:rgba(255,255,255,.38);margin-bottom:2.2rem;
-  max-width:250px;line-height:2;}
-#calibRing{width:80px;height:80px;border-radius:50%;
-  border:1px solid rgba(120,80,255,.35);position:relative;margin-bottom:1.8rem;}
-#calibDot{width:12px;height:12px;border-radius:50%;background:#7850ff;
-  position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);
-  transition:top .07s,left .07s;box-shadow:0 0 10px rgba(120,80,255,.9);}
-#calibStatus{font-family:'Space Mono',monospace;font-size:.6rem;
-  letter-spacing:.25em;color:rgba(255,255,255,.3);margin-bottom:1.5rem;}
-#calibBar{width:min(240px,60vw);height:2px;background:rgba(255,255,255,.08);border-radius:2px;}
-#calibFill{height:100%;width:0%;border-radius:2px;background:rgba(120,80,255,.8);transition:width .1s;}
-
-/* HUD */
-#hud{
-  position:fixed;top:0;left:0;right:0;z-index:20;pointer-events:none;
-  padding:14px 20px;display:flex;justify-content:space-between;align-items:flex-start;
-}
-.hcol{display:flex;flex-direction:column;gap:2px;}
-.hlbl{font-family:'Space Mono',monospace;font-size:.52rem;letter-spacing:.2em;
-  text-transform:uppercase;color:rgba(255,255,255,.22);}
-.hval{font-family:'Bebas Neue',sans-serif;font-size:1.5rem;
-  letter-spacing:.1em;color:#fff;}
-#distBar{
-  position:fixed;bottom:0;left:0;right:0;z-index:20;pointer-events:none;
-  padding:14px 28px 20px;display:flex;flex-direction:column;gap:6px;
-}
-.dlbl{font-family:'Space Mono',monospace;font-size:.52rem;letter-spacing:.25em;
-  text-transform:uppercase;color:rgba(255,255,255,.22);text-align:center;}
-.dtrack{position:relative;height:2px;background:rgba(255,255,255,.08);border-radius:2px;}
-.dcenter{position:absolute;top:-4px;left:50%;width:1px;height:10px;
-  background:rgba(255,255,255,.25);transform:translateX(-50%);}
-.dcursor{position:absolute;top:-6px;width:3px;height:14px;
-  background:#7850ff;border-radius:1px;transform:translateX(-50%);
-  box-shadow:0 0 8px rgba(120,80,255,.9);}
-
-/* overlay */
-#overlay{
-  position:fixed;inset:0;z-index:50;background:rgba(0,0,0,.9);
-  display:none;flex-direction:column;align-items:center;justify-content:center;
-  backdrop-filter:blur(10px);
-}
-#overlay.show{display:flex;}
-.obig{font-family:'Bebas Neue',sans-serif;
-  font-size:clamp(3rem,14vw,5.5rem);letter-spacing:.1em;color:#fff;
-  text-shadow:0 0 80px rgba(120,80,255,.6);margin-bottom:.2em;}
-.osub{font-family:'Space Mono',monospace;font-size:clamp(.6rem,2.5vw,.8rem);
-  letter-spacing:.2em;color:rgba(255,255,255,.38);margin-bottom:1.8rem;}
-.oscr{font-family:'Bebas Neue',sans-serif;font-size:clamp(1.3rem,5vw,1.9rem);
-  letter-spacing:.15em;color:rgba(120,80,255,.9);margin-bottom:2.5rem;}
-#retryBtn{font-family:'Bebas Neue',sans-serif;font-size:1.25rem;letter-spacing:.25em;
-  padding:13px 46px;border:1px solid rgba(120,80,255,.4);border-radius:1px;
-  background:rgba(120,80,255,.08);color:#fff;cursor:pointer;}
-</style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+  <meta name="apple-mobile-web-app-title" content="TripScan" />
+  <title>TripScan</title>
+  <!-- PWA icon hint for iPhone home screen -->
+  <link rel="apple-touch-icon" href="https://fav.farm/✈️" />
+  <style>
+    body { margin: 0; padding: 0; }
+    #root { min-height: 100vh; }
+  </style>
 </head>
 <body>
+  <div id="root"></div>
 
-<div id="splash">
-  <h1>EVENT<br>HORIZON</h1>
-  <div class="sub">tilt to resist · survive the singularity</div>
-  <button id="startBtn">ENTER THE VOID</button>
-</div>
+  <!-- React + Babel (no build step needed) -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.2/babel.min.js"></script>
 
-<div id="permBanner">
-  <h2>MOTION ACCESS</h2>
-  <p>Gyroscope required<br>to resist the pull.</p>
-  <button id="permBtn">ALLOW</button>
-</div>
+  <script type="text/babel">
+    const { useState, useEffect } = React;
 
-<div id="calibScreen">
-  <h2>CALIBRATE</h2>
-  <p>Hold your phone how you'll play.<br>Keep it still.</p>
-  <div id="calibRing"><div id="calibDot"></div></div>
-  <div id="calibStatus">READING…</div>
-  <div id="calibBar"><div id="calibFill"></div></div>
-</div>
 
-<canvas id="c"></canvas>
+const CARD_ICONS = {
+  flight: "✈️", hotel: "🏨", car: "🚗", train: "🚆",
+  cruise: "🚢", activity: "🎟️", restaurant: "🍽️", other: "📋",
+};
+const STATUS_COLORS = {
+  confirmed: "#059669", cancelled: "#dc2626", pending: "#d97706", completed: "#9ca3af",
+};
+const STATUS_BG = {
+  confirmed: "#ecfdf5", cancelled: "#fef2f2", pending: "#fffbeb", completed: "#f9fafb",
+};
 
-<div id="hud">
-  <div class="hcol"><span class="hlbl">Survived</span><span class="hval" id="timeHud">0s</span></div>
-  <div class="hcol" style="align-items:flex-end"><span class="hlbl">Distance</span><span class="hval" id="distHud">—</span></div>
-</div>
-
-<div id="distBar">
-  <div class="dlbl">DISTANCE FROM SINGULARITY</div>
-  <div class="dtrack"><div class="dcenter"></div><div class="dcursor" id="distCursor" style="left:50%"></div></div>
-</div>
-
-<div id="overlay">
-  <div class="obig">CONSUMED</div>
-  <div class="osub" id="oSub">the singularity claimed you</div>
-  <div class="oscr" id="oScr"></div>
-  <button id="retryBtn">TRY AGAIN</button>
-</div>
-
-<script>
-// ═══════════════════════════════════════════════════
-//  CANVAS
-// ═══════════════════════════════════════════════════
-const cv  = document.getElementById('c');
-const ctx = cv.getContext('2d');
-let W, H, CX, CY;
-function resize(){
-  W = cv.width  = window.innerWidth;
-  H = cv.height = window.innerHeight;
-  CX = W/2; CY = H/2;
+function formatDate(d) {
+  if (!d) return "";
+  return new Date(d + "T00:00:00").toLocaleDateString("en-AU", { month: "short", day: "numeric", year: "numeric" });
 }
-resize();
-window.addEventListener('resize', resize);
-
-// ═══════════════════════════════════════════════════
-//  SEEDED RNG
-// ═══════════════════════════════════════════════════
-let _s=12345;
-const rng=()=>{ _s=(_s*1664525+1013904223)>>>0; return _s/4294967295; };
-
-// ═══════════════════════════════════════════════════
-//  STARS  (generated once, parallax with ball lean)
-// ═══════════════════════════════════════════════════
-const STARS=[];
-for(let i=0;i<320;i++){
-  STARS.push({
-    x: rng()*2-1,   // -1 to 1 normalised
-    y: rng()*2-1,
-    r: rng()<.85 ? rng()*.9+.2 : rng()*2+1,
-    alpha: .15+rng()*.85,
-    twinkle: rng()*.08,
-    phase: rng()*Math.PI*2,
-    layer: rng()<.3 ? .2 : rng()<.6 ? .5 : 1,  // parallax depth
-  });
+function formatDateShort(d) {
+  if (!d) return "";
+  return new Date(d + "T00:00:00").toLocaleDateString("en-AU", { month: "short", day: "numeric" });
+}
+function getDaysUntil(d) {
+  const now = new Date(); now.setHours(0,0,0,0);
+  return Math.ceil((new Date(d + "T00:00:00") - now) / 86400000);
 }
 
-// ═══════════════════════════════════════════════════
-//  PHYSICS STATE
-// ═══════════════════════════════════════════════════
-// Ball position in world coords (-1 to 1 normalised to screen)
-let bx=0, by=0;   // distance from centre (0=centre)
-let bvx=0, bvy=0; // velocity
-
-// Tilt input (calibrated, smoothed)
-let tiltX=0, tiltY=0;
-let rawGamma=0, rawBeta=0;
-let calGamma=0, calBeta=0;
-let smoothX=0, smoothY=0;
-let gyroOn=false;
-
-// Physics tuning
-const SMOOTH      = 0.06;   // tilt low-pass filter
-const TILT_RANGE  = 80;     // degrees for full tilt signal
-const BH_PULL     = 0.00025; // black hole gravity toward centre
-const TILT_FORCE  = 0.00045; // counter-force from tilt
-const FRICTION    = 0.992;   // velocity damping per frame
-const DEATH_DIST  = 0.42;    // normalised distance — consumed by black hole
-const SAFE_START  = 0.22;    // starting distance from centre
-
-// ═══════════════════════════════════════════════════
-//  GAME STATE
-// ═══════════════════════════════════════════════════
-const STATE = { IDLE:'idle', PLAY:'play', DEAD:'dead' };
-let state = STATE.IDLE;
-let survived=0, bestTime=0, survivalTimer=null;
-let deathT=0;
-let frame=0;
-
-// ═══════════════════════════════════════════════════
-//  ACCRETION DISC PARTICLES
-// ═══════════════════════════════════════════════════
-const DISC = [];
-for(let i=0;i<180;i++){
-  const angle = rng()*Math.PI*2;
-  const dist  = .055 + rng()*.14;
-  DISC.push({
-    a: angle,
-    da: (.004+rng()*.006)*(rng()<.5?1:-1),  // orbital speed
-    dist,
-    alpha: .15+rng()*.55,
-    r: .8+rng()*2.2,
-    hue: 20+rng()*50,  // orange/yellow/white
-    sat: 60+rng()*40,
-    light: 55+rng()*45,
-  });
+// ── API Key Modal ─────────────────────────────────────────────────────────────
+function ApiKeyModal({ onSave, existing }) {
+  const [val, setVal] = useState(existing || "");
+  const [show, setShow] = useState(false);
+  return (
+    <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.4)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 1000 }}>
+      <div style={{ background: "#fff", borderRadius: 16, padding: 28, width: 420, maxWidth: "90vw", boxShadow: "0 20px 60px rgba(0,0,0,0.15)" }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 6 }}>
+          <span style={{ fontSize: 24 }}>🔑</span>
+          <div style={{ fontFamily: "'Playfair Display', serif", fontSize: 20, fontWeight: 700, color: "#111827" }}>
+            {existing ? "Update API Key" : "Welcome to TripScan"}
+          </div>
+        </div>
+        <p style={{ color: "#6b7280", fontSize: 13, lineHeight: 1.6, marginBottom: 20 }}>
+          TripScan uses the Anthropic API to scan your Gmail for travel bookings.
+          Enter your API key below — it's saved only in your browser's local storage and never sent anywhere except Anthropic.
+        </p>
+        <a href="https://console.anthropic.com/settings/keys" target="_blank" rel="noreferrer"
+          style={{ display: "inline-block", fontSize: 12, color: "#3b82f6", marginBottom: 16, textDecoration: "none" }}>
+          → Get your API key from console.anthropic.com
+        </a>
+        <div style={{ position: "relative", marginBottom: 20 }}>
+          <input
+            type={show ? "text" : "password"}
+            value={val}
+            onChange={e => setVal(e.target.value)}
+            placeholder="sk-ant-..."
+            style={{ width: "100%", padding: "10px 40px 10px 12px", border: "1.5px solid #e5e7eb", borderRadius: 10, fontSize: 13, fontFamily: "monospace", outline: "none", color: "#111827" }}
+          />
+          <button onClick={() => setShow(s => !s)} style={{ position: "absolute", right: 10, top: "50%", transform: "translateY(-50%)", background: "none", border: "none", cursor: "pointer", color: "#9ca3af", fontSize: 16 }}>
+            {show ? "🙈" : "👁"}
+          </button>
+        </div>
+        <div style={{ display: "flex", gap: 10 }}>
+          {existing && (
+            <button onClick={() => onSave(existing)} style={{ flex: 1, padding: "10px", background: "#f9fafb", border: "1.5px solid #e5e7eb", borderRadius: 10, fontSize: 13, cursor: "pointer", color: "#6b7280", fontWeight: 600 }}>
+              Cancel
+            </button>
+          )}
+          <button
+            onClick={() => val.trim().startsWith("sk-") && onSave(val.trim())}
+            disabled={!val.trim().startsWith("sk-")}
+            style={{ flex: 2, padding: "10px", background: val.trim().startsWith("sk-") ? "#3b82f6" : "#e5e7eb", border: "none", borderRadius: 10, fontSize: 13, cursor: val.trim().startsWith("sk-") ? "pointer" : "not-allowed", color: val.trim().startsWith("sk-") ? "#fff" : "#9ca3af", fontWeight: 700, boxShadow: val.trim().startsWith("sk-") ? "0 2px 8px rgba(59,130,246,0.3)" : "none" }}>
+            Save & Continue
+          </button>
+        </div>
+        <p style={{ fontSize: 11, color: "#d1d5db", marginTop: 14, textAlign: "center" }}>
+          Your key is stored only in this browser. Never shared with anyone except Anthropic.
+        </p>
+      </div>
+    </div>
+  );
 }
 
-// ═══════════════════════════════════════════════════
-//  GRAVITATIONAL LENSING RING PARTICLES
-// ═══════════════════════════════════════════════════
-const LENS=[];
-for(let i=0;i<60;i++){
-  const a=rng()*Math.PI*2;
-  LENS.push({
-    a,
-    da: (.002+rng()*.003)*(rng()<.5?1:-1),
-    dist:.042+rng()*.012,
-    alpha:.08+rng()*.2,
-    r:.4+rng()*1.2,
-  });
+// ── Trip Card ──────────────────────────────────────────────────────────────────
+function TripCard({ trip, isActive, onClick }) {
+  const daysUntil = getDaysUntil(trip.startDate);
+  const isPast = getDaysUntil(trip.endDate) < 0;
+  return (
+    <div onClick={onClick} style={{
+      background: isActive ? "#eff6ff" : "#fff",
+      border: isActive ? "1.5px solid #3b82f6" : "1.5px solid #e5e7eb",
+      borderRadius: 12, padding: "14px 15px", cursor: "pointer", marginBottom: 8,
+      transition: "all 0.15s", opacity: isPast ? 0.6 : 1,
+      boxShadow: isActive ? "0 2px 8px rgba(59,130,246,0.12)" : "0 1px 3px rgba(0,0,0,0.04)",
+    }}>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
+        <div>
+          <div style={{ display: "flex", alignItems: "center", gap: 7 }}>
+            <span style={{ fontSize: 16 }}>{trip.emoji || "🌍"}</span>
+            <span style={{ fontFamily: "'Playfair Display', serif", fontSize: 15, color: "#111827", fontWeight: 700 }}>{trip.name}</span>
+          </div>
+          <div style={{ fontSize: 11, color: "#9ca3af", marginTop: 3, paddingLeft: 23 }}>
+            {formatDateShort(trip.startDate)} — {formatDateShort(trip.endDate)}
+          </div>
+          {trip.travelers && trip.travelers.length > 0 && (
+            <div style={{ fontSize: 11, color: "#6b7280", marginTop: 3, paddingLeft: 23 }}>
+              👤 {trip.travelers.join(", ")}
+            </div>
+          )}
+        </div>
+        {!isPast && daysUntil >= 0 ? (
+          <div style={{ background: daysUntil <= 14 ? "#dcfce7" : "#f3f4f6", border: `1px solid ${daysUntil <= 14 ? "#86efac" : "#e5e7eb"}`, borderRadius: 20, padding: "2px 9px", fontSize: 11, color: daysUntil <= 14 ? "#16a34a" : "#6b7280", flexShrink: 0, fontWeight: 600 }}>
+            {daysUntil === 0 ? "Today" : daysUntil === 1 ? "Tomorrow" : `${daysUntil}d`}
+          </div>
+        ) : isPast ? (
+          <div style={{ background: "#f3f4f6", border: "1px solid #e5e7eb", borderRadius: 20, padding: "2px 9px", fontSize: 11, color: "#9ca3af" }}>Past</div>
+        ) : null}
+      </div>
+      <div style={{ display: "flex", gap: 4, marginTop: 9, paddingLeft: 23, flexWrap: "wrap", alignItems: "center" }}>
+        {[...new Set((trip.bookings || []).map(b => b.type))].map(type => (
+          <span key={type} style={{ fontSize: 14 }}>{CARD_ICONS[type] || "📋"}</span>
+        ))}
+        <span style={{ fontSize: 11, color: "#9ca3af", marginLeft: 3 }}>{(trip.bookings || []).length} booking{(trip.bookings || []).length !== 1 ? "s" : ""}</span>
+      </div>
+    </div>
+  );
 }
 
-// ═══════════════════════════════════════════════════
-//  DRAW UTILITIES
-// ═══════════════════════════════════════════════════
-// Convert normalised (-1..1) world coords to screen pixels
-function w2sx(nx){ return CX + nx * Math.min(W,H) * 0.5; }
-function w2sy(ny){ return CY + ny * Math.min(W,H) * 0.5; }
-function wscale(n){ return n * Math.min(W,H) * 0.5; }
+// ── Booking Card ───────────────────────────────────────────────────────────────
+function BookingCard({ booking }) {
+  const sc = STATUS_COLORS[booking.status] || "#6b7280";
+  const sb = STATUS_BG[booking.status] || "#f9fafb";
+  return (
+    <div style={{ background: "#fff", border: "1.5px solid #e5e7eb", borderRadius: 12, padding: "15px 17px", marginBottom: 10, boxShadow: "0 1px 3px rgba(0,0,0,0.04)" }}>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 10 }}>
+        <div style={{ display: "flex", gap: 12, alignItems: "flex-start", flex: 1 }}>
+          <span style={{ fontSize: 26, lineHeight: 1.2, flexShrink: 0 }}>{CARD_ICONS[booking.type] || "📋"}</span>
+          <div style={{ flex: 1 }}>
+            <div style={{ color: "#111827", fontWeight: 700, fontSize: 14 }}>{booking.title}</div>
+            <div style={{ color: "#6b7280", fontSize: 12, marginTop: 2 }}>{booking.provider}</div>
+            {booking.travelers && booking.travelers.length > 0 && (
+              <div style={{ color: "#6b7280", fontSize: 12, marginTop: 2 }}>👤 {booking.travelers.join(", ")}</div>
+            )}
+            {booking.from && booking.to && (
+              <div style={{ marginTop: 10 }}>
+                <div style={{ display: "flex", alignItems: "center" }}>
+                  <div style={{ textAlign: "center", minWidth: 90 }}>
+                    {booking.time && <div style={{ fontSize: 17, fontWeight: 700, color: "#111827", letterSpacing: -0.5 }}>{booking.time}</div>}
+                    <div style={{ fontSize: 12, color: "#374151", fontWeight: 600 }}>{booking.from}</div>
+                  </div>
+                  <div style={{ flex: 1, display: "flex", alignItems: "center", gap: 4, padding: "0 8px" }}>
+                    <div style={{ flex: 1, height: 1, background: "#d1d5db" }} />
+                    <span style={{ fontSize: 11, color: "#9ca3af" }}>✈</span>
+                    <div style={{ flex: 1, height: 1, background: "#d1d5db" }} />
+                  </div>
+                  <div style={{ textAlign: "center", minWidth: 90 }}>
+                    {booking.endTime && <div style={{ fontSize: 17, fontWeight: 700, color: "#111827", letterSpacing: -0.5 }}>{booking.endTime}</div>}
+                    <div style={{ fontSize: 12, color: "#374151", fontWeight: 600 }}>{booking.to}</div>
+                  </div>
+                </div>
+                {booking.endDate && booking.endDate !== booking.date && (
+                  <div style={{ fontSize: 11, color: "#9ca3af", textAlign: "right", marginTop: 2 }}>Arrives {formatDateShort(booking.endDate)}</div>
+                )}
+              </div>
+            )}
+            {booking.description && <div style={{ color: "#9ca3af", fontSize: 12, marginTop: 6, lineHeight: 1.5 }}>{booking.description}</div>}
+          </div>
+        </div>
+        <div style={{ textAlign: "right", flexShrink: 0 }}>
+          <div style={{ display: "inline-block", background: sb, color: sc, border: `1px solid ${sc}44`, borderRadius: 20, padding: "3px 9px", fontSize: 10, fontWeight: 700, textTransform: "uppercase", letterSpacing: 0.8 }}>{booking.status}</div>
+          {booking.price && <div style={{ color: "#059669", fontSize: 14, marginTop: 6, fontWeight: 700 }}>{booking.price}</div>}
+        </div>
+      </div>
+      <div style={{ display: "flex", gap: 14, marginTop: 10, flexWrap: "wrap", borderTop: "1px solid #f3f4f6", paddingTop: 10 }}>
+        {booking.date && <div style={{ fontSize: 12, color: "#6b7280" }}>📅 {formatDate(booking.date)}{booking.time && !booking.from ? ` · ${booking.time}` : ""}{booking.endDate && booking.endDate !== booking.date && !booking.from ? ` → ${formatDate(booking.endDate)}${booking.endTime ? ` · ${booking.endTime}` : ""}` : ""}</div>}
+        {booking.confirmationNumber && <div style={{ fontSize: 12, color: "#6b7280" }}>🔖 <span style={{ color: "#374151", fontFamily: "monospace", fontWeight: 600 }}>{booking.confirmationNumber}</span></div>}
+      </div>
+    </div>
+  );
+}
 
-// ═══════════════════════════════════════════════════
-//  DRAW BACKGROUND
-// ═══════════════════════════════════════════════════
-function drawBG(){
-  // Deep space gradient
-  const bg=ctx.createRadialGradient(CX,CY,0,CX,CY,Math.max(W,H)*.75);
-  bg.addColorStop(0,'#04020a');
-  bg.addColorStop(.4,'#020008');
-  bg.addColorStop(1,'#000000');
-  ctx.fillStyle=bg; ctx.fillRect(0,0,W,H);
+const JSON_SCHEMA = `{
+  "emailsScanned": <number>,
+  "trips": [{
+    "id": "slug", "name": "City/Trip name", "emoji": "🇫🇷",
+    "startDate": "YYYY-MM-DD", "endDate": "YYYY-MM-DD",
+    "travelers": ["First Last"],
+    "bookings": [{
+      "id": "slug", "type": "flight|hotel|car|train|cruise|activity|restaurant|other",
+      "title": "Short title", "description": "Details",
+      "travelers": ["First Last"],
+      "confirmationNumber": "ABC123 or null", "date": "YYYY-MM-DD",
+      "time": "HH:MM or null", "endDate": "YYYY-MM-DD or null", "endTime": "HH:MM or null",
+      "status": "confirmed|cancelled|pending", "provider": "Company",
+      "from": "City (CODE) or null", "to": "City (CODE) or null", "price": "$X or null"
+    }]
+  }]
+}`;
 
-  // Stars with parallax based on ball position
-  for(const s of STARS){
-    // Parallax: distant stars barely move, close ones shift more
-    const px = w2sx(s.x + bx*s.layer*0.15);
-    const py = w2sy(s.y + by*s.layer*0.15);
-    if(px<-4||px>W+4||py<-4||py>H+4) continue;
-    const tw = s.alpha*(1+s.twinkle*Math.sin(frame*.04+s.phase));
-    ctx.globalAlpha=Math.min(1,tw);
-    ctx.fillStyle='#ffffff';
-    ctx.beginPath(); ctx.arc(px,py,s.r,0,Math.PI*2); ctx.fill();
+// ── Main App ───────────────────────────────────────────────────────────────────
+function TripScan() {
+  const [apiKey, setApiKey] = useState(() => localStorage.getItem("tripscan_apikey") || "");
+  const [showKeyModal, setShowKeyModal] = useState(false);
+  const [trips, setTrips] = useState([]);
+  const [selectedId, setSelectedId] = useState(null);
+  const [status, setStatus] = useState("idle");
+  const [statusMsg, setStatusMsg] = useState("");
+  const [errorDetail, setErrorDetail] = useState("");
+  const [filter, setFilter] = useState("upcoming");
+  const [scanRange, setScanRange] = useState("180");
+
+  // Show modal on first load if no key
+  useEffect(() => {
+    if (!apiKey) setShowKeyModal(true);
+  }, []);
+
+  function saveApiKey(key) {
+    localStorage.setItem("tripscan_apikey", key);
+    setApiKey(key);
+    setShowKeyModal(false);
   }
-  ctx.globalAlpha=1;
 
-  // Nebula wisps
-  const neb=ctx.createRadialGradient(CX,CY,wscale(.3),CX,CY,wscale(1.1));
-  neb.addColorStop(0,'rgba(40,10,80,.0)');
-  neb.addColorStop(.5,'rgba(20,5,50,.08)');
-  neb.addColorStop(1,'rgba(5,0,20,.18)');
-  ctx.fillStyle=neb; ctx.fillRect(0,0,W,H);
-}
+  async function scanEmails() {
+    if (!apiKey) { setShowKeyModal(true); return; }
+    setStatus("scanning");
+    setStatusMsg("Step 1/2 — Scanning Gmail for travel emails...");
+    setErrorDetail("");
+    setTrips([]);
 
-// ═══════════════════════════════════════════════════
-//  DRAW BLACK HOLE
-// ═══════════════════════════════════════════════════
-function drawBlackHole(){
-  const bhR = wscale(.038);   // black hole visual radius
-  const cx=CX, cy=CY;
+    const after = new Date();
+    after.setDate(after.getDate() - parseInt(scanRange));
+    const afterStr = after.toISOString().split("T")[0].replace(/-/g, "/");
+    const today = new Date().toISOString().split("T")[0];
 
-  // ── Outer glow / gravitational lensing distortion ──
-  const glowR = wscale(.18);
-  const glow=ctx.createRadialGradient(cx,cy,bhR*.5,cx,cy,glowR);
-  glow.addColorStop(0,'rgba(0,0,0,1)');
-  glow.addColorStop(.18,'rgba(5,2,15,.95)');
-  glow.addColorStop(.35,'rgba(15,5,35,.7)');
-  glow.addColorStop(.55,'rgba(30,8,55,.35)');
-  glow.addColorStop(.75,'rgba(20,5,40,.12)');
-  glow.addColorStop(1,'rgba(0,0,0,0)');
-  ctx.fillStyle=glow;
-  ctx.beginPath(); ctx.arc(cx,cy,glowR,0,Math.PI*2); ctx.fill();
+    try {
+      const turn1 = await fetch("https://api.anthropic.com/v1/messages", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "x-api-key": apiKey, "anthropic-version": "2023-06-01", "anthropic-dangerous-direct-browser-access": "true" },
+        body: JSON.stringify({
+          model: "claude-sonnet-4-20250514",
+          max_tokens: 8000,
+          system: `You are a travel booking scanner. Search the user's Gmail for travel booking confirmation emails (flights, hotels, car rentals, trains, cruises, activities).
+Search query: subject:(booking OR confirmation OR itinerary OR reservation OR "flight confirmation" OR "hotel confirmation" OR "car rental" OR "e-ticket") after:${afterStr}
+Use maxResults 20. Read the full body of up to 10 of the most relevant travel emails.
+For each booking found, extract: traveler names, dates, confirmation numbers, routes, providers, prices, flight times, seat/room details.
+Summarise all bookings clearly.`,
+          messages: [{ role: "user", content: "Scan my Gmail and summarise all travel bookings you find, including traveler names and flight times." }],
+          mcp_servers: [{ type: "url", url: "https://gmail.mcp.claude.com/mcp", name: "gmail-mcp" }],
+        }),
+      });
 
-  // ── Accretion disc particles ──
-  for(const p of DISC){
-    p.a += p.da;
-    const distPx = wscale(p.dist);
-    const px=cx+Math.cos(p.a)*distPx*1.8;  // elliptical
-    const py=cy+Math.sin(p.a)*distPx*0.55;
-    // fade out particles near the event horizon
-    const fade=Math.max(0,(p.dist-.055)/.14);
-    ctx.globalAlpha=p.alpha*fade;
-    ctx.fillStyle=`hsl(${p.hue},${p.sat}%,${p.light}%)`;
-    ctx.beginPath(); ctx.arc(px,py,p.r,0,Math.PI*2); ctx.fill();
-  }
-  ctx.globalAlpha=1;
+      if (!turn1.ok) {
+        const errText = await turn1.text();
+        if (turn1.status === 401) throw new Error("Invalid API key. Click the ⚙️ settings button to update it.");
+        throw new Error(`API error ${turn1.status}: ${errText}`);
+      }
+      const data1 = await turn1.json();
+      if (data1.error) throw new Error(data1.error.message);
 
-  // ── Photon ring ──
-  const ringR=wscale(.048);
-  const ringGrad=ctx.createRadialGradient(cx,cy,ringR*.85,cx,cy,ringR*1.2);
-  ringGrad.addColorStop(0,'rgba(255,160,40,0)');
-  ringGrad.addColorStop(.35,'rgba(255,180,60,.55)');
-  ringGrad.addColorStop(.65,'rgba(255,200,80,.3)');
-  ringGrad.addColorStop(1,'rgba(255,140,20,0)');
-  ctx.strokeStyle='rgba(255,170,50,.5)';
-  ctx.lineWidth=wscale(.007);
-  ctx.beginPath(); ctx.arc(cx,cy,ringR,0,Math.PI*2); ctx.stroke();
+      const summary = (data1.content || []).filter(b => b.type === "text").map(b => b.text).join("\n");
+      if (!summary) throw new Error("No summary returned. stop_reason: " + data1.stop_reason);
 
-  // ── Gravitational lensing arcs ──
-  for(const l of LENS){
-    l.a += l.da;
-    const distPx=wscale(l.dist);
-    const px=cx+Math.cos(l.a)*distPx*1.6;
-    const py=cy+Math.sin(l.a)*distPx*0.48;
-    ctx.globalAlpha=l.alpha*(0.7+0.3*Math.sin(frame*.03+l.a));
-    ctx.fillStyle='rgba(255,220,150,1)';
-    ctx.beginPath(); ctx.arc(px,py,l.r,0,Math.PI*2); ctx.fill();
-  }
-  ctx.globalAlpha=1;
+      setStatusMsg("Step 2/2 — Structuring bookings...");
 
-  // ── Inner shadow — the actual singularity ──
-  const inner=ctx.createRadialGradient(cx,cy,0,cx,cy,bhR*1.4);
-  inner.addColorStop(0,'rgba(0,0,0,1)');
-  inner.addColorStop(.7,'rgba(0,0,0,1)');
-  inner.addColorStop(1,'rgba(0,0,0,0)');
-  ctx.fillStyle=inner;
-  ctx.beginPath(); ctx.arc(cx,cy,bhR*1.4,0,Math.PI*2); ctx.fill();
+      const turn2 = await fetch("https://api.anthropic.com/v1/messages", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "x-api-key": apiKey, "anthropic-version": "2023-06-01", "anthropic-dangerous-direct-browser-access": "true" },
+        body: JSON.stringify({
+          model: "claude-sonnet-4-20250514",
+          max_tokens: 4000,
+          system: `You convert travel booking summaries into structured JSON.
+Today is ${today}.
+Respond with ONLY a valid JSON object — no markdown, no backticks, no explanation.
+Include traveler names and all flight times (departure/arrival).
+Schema:
+${JSON_SCHEMA}`,
+          messages: [{ role: "user", content: `Convert this to JSON:\n\n${summary}` }],
+        }),
+      });
 
-  // Lensing ring glow flicker
-  ctx.globalAlpha=0.3+0.15*Math.sin(frame*.07);
-  const flickerGrad=ctx.createRadialGradient(cx,cy,bhR,cx,cy,bhR*2.5);
-  flickerGrad.addColorStop(0,'rgba(255,140,20,.4)');
-  flickerGrad.addColorStop(1,'rgba(0,0,0,0)');
-  ctx.fillStyle=flickerGrad;
-  ctx.beginPath(); ctx.arc(cx,cy,bhR*2.5,0,Math.PI*2); ctx.fill();
-  ctx.globalAlpha=1;
-}
+      if (!turn2.ok) throw new Error(`API error ${turn2.status}: ${await turn2.text()}`);
+      const data2 = await turn2.json();
+      if (data2.error) throw new Error(data2.error.message);
 
-// ═══════════════════════════════════════════════════
-//  DRAW BALL
-// ═══════════════════════════════════════════════════
-function drawBall(){
-  const sx=w2sx(bx), sy=w2sy(by);
-  const br=wscale(.018);
+      const rawText = (data2.content || []).filter(b => b.type === "text").map(b => b.text).join("").trim();
+      const clean = rawText.replace(/^```json\s*/i, "").replace(/^```\s*/i, "").replace(/\s*```$/i, "").trim();
 
-  // Gravitational stretch: ball elongates toward black hole
-  const dx=-bx, dy=-by;   // direction toward BH
-  const dist=Math.sqrt(bx*bx+by*by);
-  const stretch= dist>0 ? 1+(.22/Math.max(dist,.05)) : 1;
-  const angle=Math.atan2(dy,dx);
+      let parsed;
+      try { parsed = JSON.parse(clean); }
+      catch (e) { throw new Error("JSON parse failed: " + clean.slice(0, 400)); }
 
-  // Trail
-  if(state===STATE.PLAY){
-    ctx.save();
-    ctx.translate(sx,sy); ctx.rotate(angle);
-    for(let i=1;i<=5;i++){
-      const td=i*.018;
-      ctx.globalAlpha=(.18-i*.028)*Math.min(1,dist*2);
-      ctx.fillStyle=`hsl(${220+dist*80},70%,${60+dist*20}%)`;
-      ctx.beginPath();
-      ctx.ellipse(td*wscale(1),0,br*.8,br*.4,0,0,Math.PI*2);
-      ctx.fill();
+      const sortedTrips = (parsed.trips || []).sort((a, b) => new Date(a.startDate) - new Date(b.startDate));
+      setTrips(sortedTrips);
+      const firstUpcoming = sortedTrips.find(t => getDaysUntil(t.endDate) >= 0);
+      setSelectedId(firstUpcoming?.id || sortedTrips[sortedTrips.length - 1]?.id || null);
+      setStatus("done");
+      setStatusMsg(`Found ${sortedTrips.length} trip${sortedTrips.length !== 1 ? "s" : ""} from ${parsed.emailsScanned || "your"} emails.`);
+    } catch (err) {
+      setStatus("error");
+      setStatusMsg("Scan failed.");
+      setErrorDetail(err.message);
     }
-    ctx.restore();
-  }
-  ctx.globalAlpha=1;
-
-  // Outer glow
-  const glowR=br*3.5;
-  const ballGlow=ctx.createRadialGradient(sx,sy,0,sx,sy,glowR);
-  const hue=200+dist*120;
-  ballGlow.addColorStop(0,`hsla(${hue},80%,80%,.28)`);
-  ballGlow.addColorStop(1,'rgba(0,0,0,0)');
-  ctx.fillStyle=ballGlow;
-  ctx.beginPath(); ctx.arc(sx,sy,glowR,0,Math.PI*2); ctx.fill();
-
-  // Ball body — stretched ellipse
-  ctx.save();
-  ctx.translate(sx,sy); ctx.rotate(angle);
-  const ballGrad=ctx.createRadialGradient(-br*.25,-br*.25,0,0,0,br*stretch);
-  ballGrad.addColorStop(0,'#ffffff');
-  ballGrad.addColorStop(.3,`hsl(${hue},75%,68%)`);
-  ballGrad.addColorStop(1,`hsl(${hue+20},85%,35%)`);
-  ctx.fillStyle=ballGrad;
-  ctx.beginPath();
-  ctx.ellipse(0,0,br*stretch,br/Math.sqrt(stretch),0,0,Math.PI*2);
-  ctx.fill();
-  ctx.restore();
-
-  // Proximity warning ring
-  if(dist<DEATH_DIST+.08){
-    const danger=(DEATH_DIST+.08-dist)/.08;
-    const pulse=.5+.5*Math.sin(Date.now()*.018);
-    ctx.globalAlpha=danger*pulse*.6;
-    ctx.strokeStyle=`hsl(${hue},90%,65%)`;
-    ctx.lineWidth=wscale(.003);
-    ctx.beginPath(); ctx.arc(sx,sy,br*2.5,0,Math.PI*2); ctx.stroke();
-    ctx.globalAlpha=1;
-  }
-}
-
-// ═══════════════════════════════════════════════════
-//  DRAW TIDAL FORCE LINES (show pull direction)
-// ═══════════════════════════════════════════════════
-function drawForceField(){
-  if(state!==STATE.PLAY) return;
-  const sx=w2sx(bx), sy=w2sy(by);
-  const dist=Math.sqrt(bx*bx+by*by);
-  if(dist<.01) return;
-
-  // Arrow pointing toward black hole
-  const angle=Math.atan2(-by,-bx);
-  const strength=Math.min(1,(DEATH_DIST+.15-dist)/.3);
-  if(strength<=0) return;
-
-  const arrowLen=wscale(.06)*strength;
-  ctx.save();
-  ctx.translate(sx,sy); ctx.rotate(angle);
-  ctx.globalAlpha=strength*.35;
-  ctx.strokeStyle='rgba(255,140,30,.8)';
-  ctx.lineWidth=wscale(.003);
-  ctx.setLineDash([wscale(.008),wscale(.008)]);
-  ctx.beginPath(); ctx.moveTo(wscale(.022),0); ctx.lineTo(wscale(.022)+arrowLen,0); ctx.stroke();
-  ctx.setLineDash([]);
-  ctx.restore();
-  ctx.globalAlpha=1;
-}
-
-// ═══════════════════════════════════════════════════
-//  DRAW DEATH
-// ═══════════════════════════════════════════════════
-function drawDeath(){
-  deathT=Math.min(1,deathT+.022);
-  // Pull ball toward centre
-  bx *= (1-deathT*.12);
-  by *= (1-deathT*.12);
-  // Screen flash + warp
-  const flash=ctx.createRadialGradient(CX,CY,0,CX,CY,Math.max(W,H)*.8);
-  flash.addColorStop(0,`rgba(100,40,255,${deathT*.4})`);
-  flash.addColorStop(.4,`rgba(20,0,60,${deathT*.6})`);
-  flash.addColorStop(1,`rgba(0,0,0,${deathT*.9})`);
-  ctx.fillStyle=flash; ctx.fillRect(0,0,W,H);
-}
-
-// ═══════════════════════════════════════════════════
-//  MAIN DRAW
-// ═══════════════════════════════════════════════════
-function draw(){
-  frame++;
-  ctx.clearRect(0,0,W,H);
-  drawBG();
-  drawBlackHole();
-  if(state!==STATE.IDLE){
-    drawForceField();
-    drawBall();
-  }
-  if(state===STATE.DEAD) drawDeath();
-
-  // Vignette
-  const vig=ctx.createRadialGradient(CX,CY,Math.min(W,H)*.3,CX,CY,Math.max(W,H)*.7);
-  vig.addColorStop(0,'rgba(0,0,0,0)');
-  vig.addColorStop(1,'rgba(0,0,0,0.55)');
-  ctx.fillStyle=vig; ctx.fillRect(0,0,W,H);
-}
-
-// ═══════════════════════════════════════════════════
-//  PHYSICS
-// ═══════════════════════════════════════════════════
-function physicsStep(){
-  if(state!==STATE.PLAY) return;
-
-  // Black hole pulls ball toward centre (0,0)
-  const dist=Math.sqrt(bx*bx+by*by);
-  if(dist>0.001){
-    // Pull force scales with proximity (stronger near BH)
-    const pull=BH_PULL*(1+.5/(dist+.1));
-    bvx -= (bx/dist)*pull;
-    bvy -= (by/dist)*pull;
   }
 
-  // Tilt pushes ball away from centre in tilt direction
-  bvx += tiltX * TILT_FORCE;
-  bvy += tiltY * TILT_FORCE;
+  const now = new Date(); now.setHours(0,0,0,0);
+  const filtered = trips.filter(t => {
+    const end = new Date(t.endDate + "T00:00:00");
+    if (filter === "upcoming") return end >= now;
+    if (filter === "past") return end < now;
+    return true;
+  });
+  const active = trips.find(t => t.id === selectedId);
+  const nextTrip = trips.filter(t => getDaysUntil(t.startDate) >= 0).sort((a, b) => getDaysUntil(a.startDate) - getDaysUntil(b.startDate))[0];
 
-  // Friction
-  bvx *= FRICTION;
-  bvy *= FRICTION;
+  return (
+    <div style={{ minHeight: "100vh", background: "#f8fafc", fontFamily: "'DM Sans', sans-serif", color: "#111827" }}>
+      <style>{`
+        @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=DM+Sans:wght@300;400;500;600&display=swap');
+        * { box-sizing: border-box; }
+        ::-webkit-scrollbar { width: 4px; }
+        ::-webkit-scrollbar-thumb { background: #e5e7eb; border-radius: 4px; }
+        @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+      `}</style>
 
-  bx += bvx;
-  by += bvy;
+      {/* API Key Modal */}
+      {showKeyModal && <ApiKeyModal onSave={saveApiKey} existing={apiKey} />}
 
-  // Update HUD
-  const distPct = Math.max(0, Math.min(100, (1 - dist/DEATH_DIST)*50 + 50));
-  document.getElementById('distCursor').style.left = Math.max(2,Math.min(98,distPct))+'%';
-  const col = dist>DEATH_DIST*.6 ? '#7850ff' : dist>DEATH_DIST*.85 ? '#f59e0b' : '#ef4444';
-  document.getElementById('distCursor').style.background=col;
-  document.getElementById('distCursor').style.boxShadow=`0 0 8px ${col}`;
-  document.getElementById('distHud').textContent = Math.round(dist*1000)+'m';
+      {/* Header */}
+      <div style={{ borderBottom: "1.5px solid #e5e7eb", padding: "14px 20px", display: "flex", alignItems: "center", justifyContent: "space-between", background: "#fff", boxShadow: "0 1px 3px rgba(0,0,0,0.05)" }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+          <span style={{ fontSize: 22 }}>✈️</span>
+          <div>
+            <div style={{ fontFamily: "'Playfair Display', serif", fontSize: 20, fontWeight: 700, color: "#111827" }}>TripScan</div>
+            <div style={{ fontSize: 10, color: "#9ca3af", letterSpacing: 1.5, textTransform: "uppercase" }}>Travel Dashboard</div>
+          </div>
+        </div>
+        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+          {nextTrip && status === "done" && (
+            <div style={{ background: "#f0fdf4", border: "1.5px solid #86efac", borderRadius: 10, padding: "6px 12px", textAlign: "right" }}>
+              <div style={{ fontSize: 10, color: "#16a34a", letterSpacing: 1, textTransform: "uppercase", marginBottom: 1 }}>Next Trip</div>
+              <div style={{ fontSize: 13, color: "#111827", fontWeight: 700 }}>{nextTrip.emoji} {nextTrip.name}</div>
+              <div style={{ fontSize: 11, color: "#6b7280" }}>{getDaysUntil(nextTrip.startDate) === 0 ? "Today!" : `in ${getDaysUntil(nextTrip.startDate)} days`}</div>
+            </div>
+          )}
+          <select value={scanRange} onChange={e => setScanRange(e.target.value)} disabled={status === "scanning"} style={{ background: "#fff", border: "1.5px solid #e5e7eb", borderRadius: 8, padding: "7px 9px", color: "#374151", fontSize: 12, cursor: "pointer" }}>
+            <option value="30">Last 30 days</option>
+            <option value="90">Last 90 days</option>
+            <option value="180">Last 6 months</option>
+            <option value="365">Last year</option>
+          </select>
+          <button onClick={scanEmails} disabled={status === "scanning"} style={{ background: status === "scanning" ? "#eff6ff" : "#3b82f6", border: "none", color: status === "scanning" ? "#3b82f6" : "#fff", borderRadius: 10, padding: "8px 16px", fontSize: 13, fontWeight: 600, cursor: status === "scanning" ? "not-allowed" : "pointer", boxShadow: status === "scanning" ? "none" : "0 2px 6px rgba(59,130,246,0.3)" }}>
+            {status === "scanning" ? <><span style={{ display: "inline-block", animation: "spin 1s linear infinite", marginRight: 5 }}>⟳</span>Scanning...</> : "🔍 Scan"}
+          </button>
+          {/* Settings / API key button */}
+          <button onClick={() => setShowKeyModal(true)} title="API Key Settings" style={{ background: "#f9fafb", border: "1.5px solid #e5e7eb", borderRadius: 10, padding: "8px 10px", fontSize: 15, cursor: "pointer", color: apiKey ? "#6b7280" : "#dc2626" }}>
+            ⚙️
+          </button>
+        </div>
+      </div>
 
-  // Death check
-  if(dist < DEATH_DIST * .07){
-    triggerDeath();
-  }
+      {/* Status bar */}
+      {statusMsg && (
+        <div style={{ padding: "8px 20px", background: status === "error" ? "#fef2f2" : "#f0fdf4", borderBottom: "1px solid #e5e7eb", fontSize: 12, color: status === "error" ? "#dc2626" : "#16a34a" }}>
+          {status === "scanning" && <span style={{ display: "inline-block", animation: "spin 1s linear infinite", marginRight: 6 }}>⟳</span>}
+          {statusMsg}
+          {errorDetail && <div style={{ fontSize: 11, color: "#dc2626", marginTop: 4, fontFamily: "monospace", whiteSpace: "pre-wrap", wordBreak: "break-all" }}>{errorDetail}</div>}
+        </div>
+      )}
+
+      {/* Empty / onboarding state */}
+      {trips.length === 0 && status !== "scanning" && (
+        <div style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", minHeight: "65vh", gap: 14, padding: "0 20px" }}>
+          <div style={{ fontSize: 52 }}>🗺️</div>
+          <div style={{ fontFamily: "'Playfair Display', serif", fontSize: 26, color: "#111827", fontWeight: 700, textAlign: "center" }}>Your trips, all in one place</div>
+          <div style={{ color: "#6b7280", fontSize: 14, maxWidth: 360, textAlign: "center", lineHeight: 1.7 }}>
+            TripScan scans your Gmail for flight, hotel, car and activity confirmations and organises them into trips.
+          </div>
+          {!apiKey && (
+            <button onClick={() => setShowKeyModal(true)} style={{ background: "#fef9c3", border: "1.5px solid #fde047", color: "#854d0e", borderRadius: 10, padding: "10px 20px", fontSize: 13, fontWeight: 600, cursor: "pointer" }}>
+              🔑 Set your Anthropic API key first
+            </button>
+          )}
+          <button onClick={scanEmails} style={{ background: "#3b82f6", border: "none", color: "#fff", borderRadius: 12, padding: "13px 28px", fontSize: 15, fontWeight: 600, cursor: "pointer", boxShadow: "0 4px 12px rgba(59,130,246,0.3)" }}>
+            ✈️ Scan My Emails
+          </button>
+        </div>
+      )}
+
+      {/* Main layout */}
+      {(trips.length > 0 || status === "scanning") && (
+        <div style={{ display: "flex", height: "calc(100vh - 57px)" }}>
+          {/* Sidebar */}
+          <div style={{ width: 265, flexShrink: 0, borderRight: "1.5px solid #e5e7eb", padding: "14px 12px", overflowY: "auto", background: "#fff" }}>
+            <div style={{ display: "flex", gap: 3, marginBottom: 12, background: "#f3f4f6", borderRadius: 10, padding: 3 }}>
+              {["upcoming","past","all"].map(f => (
+                <button key={f} onClick={() => setFilter(f)} style={{ flex: 1, padding: "5px 0", borderRadius: 8, border: "none", background: filter === f ? "#fff" : "transparent", color: filter === f ? "#111827" : "#9ca3af", fontSize: 12, cursor: "pointer", fontWeight: filter === f ? 600 : 400, textTransform: "capitalize", transition: "all 0.15s", boxShadow: filter === f ? "0 1px 3px rgba(0,0,0,0.08)" : "none" }}>{f}</button>
+              ))}
+            </div>
+            {filtered.map(trip => (
+              <TripCard key={trip.id} trip={trip} isActive={selectedId === trip.id} onClick={() => setSelectedId(trip.id)} />
+            ))}
+            {filtered.length === 0 && <div style={{ color: "#9ca3af", fontSize: 13, textAlign: "center", padding: "30px 0" }}>No trips</div>}
+          </div>
+
+          {/* Detail panel */}
+          <div style={{ flex: 1, overflowY: "auto", padding: "24px 28px", background: "#f8fafc" }}>
+            {active ? (
+              <>
+                <div style={{ marginBottom: 22, display: "flex", alignItems: "center", gap: 14 }}>
+                  <span style={{ fontSize: 36 }}>{active.emoji || "🌍"}</span>
+                  <div>
+                    <div style={{ fontFamily: "'Playfair Display', serif", fontSize: 30, fontWeight: 700, color: "#111827", lineHeight: 1 }}>{active.name}</div>
+                    <div style={{ color: "#6b7280", fontSize: 13, marginTop: 5 }}>
+                      {formatDate(active.startDate)} — {formatDate(active.endDate)}
+                      <span style={{ margin: "0 8px", color: "#d1d5db" }}>·</span>
+                      {(active.bookings || []).length} booking{(active.bookings || []).length !== 1 ? "s" : ""}
+                      {active.travelers && active.travelers.length > 0 && (
+                        <><span style={{ margin: "0 8px", color: "#d1d5db" }}>·</span>👤 {active.travelers.join(", ")}</>
+                      )}
+                    </div>
+                  </div>
+                </div>
+                {["flight","train","hotel","car","activity","restaurant","cruise","other"].map(type => {
+                  const typed = (active.bookings || []).filter(b => b.type === type);
+                  if (!typed.length) return null;
+                  const label = type === "car" ? "Car Rental" : type.charAt(0).toUpperCase() + type.slice(1);
+                  return (
+                    <div key={type} style={{ marginBottom: 26 }}>
+                      <div style={{ fontSize: 11, color: "#9ca3af", letterSpacing: 1.5, textTransform: "uppercase", marginBottom: 10, display: "flex", alignItems: "center", gap: 7, borderBottom: "1.5px solid #e5e7eb", paddingBottom: 8 }}>
+                        <span style={{ fontSize: 15 }}>{CARD_ICONS[type]}</span>{label}{typed.length > 1 ? "s" : ""}
+                      </div>
+                      {typed.map(b => <BookingCard key={b.id} booking={b} />)}
+                    </div>
+                  );
+                })}
+              </>
+            ) : trips.length > 0 ? (
+              <div style={{ color: "#9ca3af", padding: "50px 0", textAlign: "center" }}>Select a trip</div>
+            ) : null}
+          </div>
+        </div>
+      )}
+    </div>
+  );
 }
 
-// ═══════════════════════════════════════════════════
-//  MAIN LOOP
-// ═══════════════════════════════════════════════════
-let lastTs=0, animId=null;
-function loop(ts){
-  const dt=Math.min(.05,(ts-lastTs)/1000||.016);
-  lastTs=ts;
-  applyKeyboard();
-  physicsStep();
-  draw();
-  animId=requestAnimationFrame(loop);
-}
 
-// ═══════════════════════════════════════════════════
-//  GAME FLOW
-// ═══════════════════════════════════════════════════
-function startGame(){
-  // Place ball at a safe orbit distance
-  const angle=Math.random()*Math.PI*2;
-  bx=Math.cos(angle)*SAFE_START;
-  by=Math.sin(angle)*SAFE_START;
-  // Give it a small tangential velocity so it naturally wants to orbit
-  const tangAngle=angle+Math.PI/2;
-  bvx=Math.cos(tangAngle)*.0018;
-  bvy=Math.sin(tangAngle)*.0018;
-  state=STATE.PLAY;
-  survived=0;
-  deathT=0;
-  clearInterval(survivalTimer);
-  survivalTimer=setInterval(()=>{
-    if(state!==STATE.PLAY) return;
-    survived++;
-    document.getElementById('timeHud').textContent=survived+'s';
-  },1000);
-}
-
-function triggerDeath(){
-  if(state===STATE.DEAD) return;
-  state=STATE.DEAD;
-  clearInterval(survivalTimer);
-  if(survived>bestTime) bestTime=survived;
-  setTimeout(showGameOver,1600);
-}
-
-function showGameOver(){
-  document.getElementById('oScr').textContent=survived+'s  —  best: '+bestTime+'s';
-  document.getElementById('overlay').classList.add('show');
-}
-
-document.getElementById('retryBtn').addEventListener('click',()=>{
-  document.getElementById('overlay').classList.remove('show');
-  smoothX=0; smoothY=0; tiltX=0; tiltY=0;
-  document.getElementById('timeHud').textContent='0s';
-  document.getElementById('distHud').textContent='—';
-  startCalibration();
-});
-
-// ═══════════════════════════════════════════════════
-//  GYRO + CALIBRATION
-// ═══════════════════════════════════════════════════
-function attachGyro(){
-  window.addEventListener('deviceorientation',e=>{
-    rawGamma=e.gamma||0; rawBeta=e.beta||0;
-    const rx=Math.max(-1,Math.min(1,(rawGamma-calGamma)/TILT_RANGE));
-    const ry=Math.max(-1,Math.min(1,(rawBeta -calBeta )/TILT_RANGE));
-    smoothX+=(rx-smoothX)*SMOOTH;
-    smoothY+=(ry-smoothY)*SMOOTH;
-    tiltX=smoothX; tiltY=smoothY;
-  },true);
-  gyroOn=true;
-}
-
-let calibSamples=[], calibInterval2=null, calibTimer2=null;
-const CALIB_MS=2000;
-
-function startCalibration(){
-  document.getElementById('calibScreen').classList.add('show');
-  calibSamples=[];
-  document.getElementById('calibFill').style.width='0%';
-  document.getElementById('calibStatus').textContent='READING YOUR ANGLE…';
-  document.getElementById('calibDot').style.background='#7850ff';
-  document.getElementById('calibDot').style.boxShadow='0 0 10px rgba(120,80,255,.9)';
-  const start=Date.now();
-  clearInterval(calibInterval2); clearTimeout(calibTimer2);
-  calibInterval2=setInterval(()=>{
-    calibSamples.push({g:rawGamma,b:rawBeta});
-    const dx=Math.max(-1,Math.min(1,rawGamma/30));
-    const dy=Math.max(-1,Math.min(1,(rawBeta-15)/30));
-    const ring=document.getElementById('calibRing');
-    const r=ring.offsetWidth/2-8;
-    document.getElementById('calibDot').style.left=(50+dx*r/(ring.offsetWidth/2)*100)+'%';
-    document.getElementById('calibDot').style.top =(50+dy*r/(ring.offsetHeight/2)*100)+'%';
-    document.getElementById('calibFill').style.width=Math.min(100,(Date.now()-start)/CALIB_MS*100)+'%';
-  },60);
-  calibTimer2=setTimeout(finishCalibration, CALIB_MS);
-}
-
-function finishCalibration(){
-  clearInterval(calibInterval2);
-  if(calibSamples.length<5){startCalibration();return;}
-  const half=calibSamples.slice(Math.floor(calibSamples.length/2));
-  calGamma=half.reduce((a,s)=>a+s.g,0)/half.length;
-  calBeta =half.reduce((a,s)=>a+s.b,0)/half.length;
-  document.getElementById('calibStatus').textContent='CALIBRATED  ✓';
-  document.getElementById('calibDot').style.background='#22c55e';
-  document.getElementById('calibDot').style.boxShadow='0 0 12px rgba(34,197,94,.9)';
-  document.getElementById('calibDot').style.top='50%';
-  document.getElementById('calibDot').style.left='50%';
-  setTimeout(()=>{
-    document.getElementById('calibScreen').classList.remove('show');
-    startGame();
-  },600);
-}
-
-const keys={};
-window.addEventListener('keydown',e=>keys[e.key]=true);
-window.addEventListener('keyup',  e=>keys[e.key]=false);
-function applyKeyboard(){
-  if(gyroOn) return;
-  if     (keys['ArrowLeft'] ||keys['a']) tiltX=Math.max(-1,tiltX-.1);
-  else if(keys['ArrowRight']||keys['d']) tiltX=Math.min( 1,tiltX+.1);
-  else tiltX*=.85;
-  if     (keys['ArrowUp']   ||keys['w']) tiltY=Math.max(-1,tiltY-.1);
-  else if(keys['ArrowDown'] ||keys['s']) tiltY=Math.min( 1,tiltY+.1);
-  else tiltY*=.85;
-}
-
-// ═══════════════════════════════════════════════════
-//  BOOT
-// ═══════════════════════════════════════════════════
-function beginGame(){
-  document.getElementById('splash').style.opacity='0';
-  setTimeout(()=>document.getElementById('splash').style.display='none',700);
-  animId=requestAnimationFrame(loop);
-  setTimeout(startCalibration,600);
-}
-
-function requestGyroPermission(){
-  if(typeof DeviceOrientationEvent!=='undefined'&&
-     typeof DeviceOrientationEvent.requestPermission==='function'){
-    DeviceOrientationEvent.requestPermission()
-      .then(s=>{if(s==='granted')attachGyro(); beginGame();})
-      .catch(()=>beginGame());
-  } else { attachGyro(); beginGame(); }
-}
-
-document.getElementById('startBtn').addEventListener('click',()=>{
-  if(typeof DeviceOrientationEvent!=='undefined'&&
-     typeof DeviceOrientationEvent.requestPermission==='function')
-    document.getElementById('permBanner').classList.add('show');
-  else requestGyroPermission();
-});
-document.getElementById('permBtn').addEventListener('click',()=>{
-  document.getElementById('permBanner').classList.remove('show');
-  requestGyroPermission();
-});
-
-animId=requestAnimationFrame(loop);
-</script>
+    const root = ReactDOM.createRoot(document.getElementById('root'));
+    root.render(<TripScan />);
+  </script>
 </body>
 </html>
